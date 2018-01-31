@@ -1,0 +1,20 @@
+DynamicVariable-Framework using Proxies, override getters and setters => every variable can be converted into a dynamic variable (e.g. delayed) without having to apply any changes to the lines of codes that use the variable
+
+e.g. RelativeArray(all values are automatically returned normed);
+
+avoid running iterations explicitly. Instead execute epochs
+
+Add Seed functionality for whole algorithm in order to retrack the behavior in different runs
+
+Run several configurations against each other and plot resutls
+
+In general attempt to make every component of the model interchangeably so it can be replaced and cross-tetsed with a different version (e.g. with replacement or without, replacement of winner vs. competition for ressource)
+
+Configuration Testing Environment
+- run configuration several times over a specified number number of timesteps. Visualize results against each other. Calculate standard deviation between runs
+- run several configurations against each other (averaged out). plot results against each other
+	-> including different algorithms
+
+
+Factory methods: cache instances that have been previously created and provide clone of them
+

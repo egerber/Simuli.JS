@@ -1,0 +1,10 @@
+performance in flat model (depth=0, count_ports=x) converges much faster towards good performance than nested models. Probably due to the fact that the model increasingly extended by synapses and only updates once all branches are fully equipped with synapses
+-> TODO: Try out if initial random initialization changes the situation
+
+
+- The more input units exist, the slower the convergence towards good performance of the model. Could be due the fact, that more connections can be formed, therefore more wrong connections are possible
+
+The smaller the training iterations (e.g. <15), the more heavily does the performance (score) fluctuate. This is due to the fact that the statistics 
+
+Models show about the same convergence towards good performance, independent of the period. Even periods>iterations work out great
+- e.g performance (iterations:50,inputs:50,period:25,depth:0,ports:10) ~ (iterations:50,period:400,inputs:50,depth:0, ports:10)

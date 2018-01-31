@@ -1,0 +1,94 @@
+- define global ressoure for competition: max_synapses
+	-> integrator_unit with worst score gets new ressource
+		=> no specification of max_depth and count_ports necessary, self-organization
+
+Build Generic Component Template with the interface
+- input_ports
+- output_ports
+- link
+
+-------
+
+So far a Model was implemented to learn the mapping from input(t) -> input(t+1). This implementation should be altered in order to perform a more general mapping from input(t) -> output(t) where output(t) can be input(t+1) as well. This would create the opportunity to easily build hierarchies of models. The goal is to arrive at a model that makes predictions by means of a very limited set of patterns. These patterns are provided by lower level models. 
+Example: The input is of length 50. The goal is to predict the input of the next timestep. So far, the model can learn to build the correct synapses between input(t) and input(t+1) in order to find a stable transition and be able to make a solid prediction. However this requires a lot of synapses (e.g. 10 synapses per input item, 50 in this example). Furthermore, the learned predictions will have no value when a different type of input pattern is applied. Also when we look at cellular automata, this approach seems not smart, since the amount of rules for the pattern is very limited. 
+Ideally the model should come up with more "compressed" patterns, that is less synapses and more globally used patterns. Optimally, these patterns should hold some value when a new input pattern is applied.
+This could be achieved by building up a hierarchy of models. For the example with 50 inputs, this could look like this:
+The first layer creates k (e.g. 10) m:n models (e.g. 10:3, inputs to outputs). The selection of these models (or patterns) is according to how useful they are in making correct predictions. The patterns then would be used by layer 2, which optmizes as well as the selection of patterns to be used for the prediction of a specific input item, as well as which inputs from t+1 are passed into a pattern and which corresponding input item is connected to it. The patterns on layer 1 would be optimized based on how well the performance on layer 2 is. 
+-> somehow, layer 2 must make prediction by EITHER choosing from a limited set of patterns OR choosing a limited number of patterns from a large set (including specific synapses)
+
+
+
+The current implementation defines 0 and 1 as two different states, without attributing any meaning to them. This makes it hard to encode patterns. It is impossible to define a unit that receives multiple input and outputs whether one specfic input configuration applied (e.g. 0001101). This is only possible if we define the output state 1 as a boolean indicator for the existence of a pattern. 
+-> I could implement a unit that is given k random inputs and that learns to output 1 for the most frequent input configuration that is receives. The following layer could use this information in order to make valid predictions. The predictions could again refer to some pattern. e.g. pattern_1(t)->pattern_25(t+1)
+
+-> How could fuzziness be introduced to this approach without introducing probabilities or specifying the minimal number of matching inputs for a pattern (e.g output 1 if at least 4 out of 5 inputs match)
+	-> OR method: fire if the inputs match to any of multiple configurations
+
+
+
+How does the neural information processing work?
+-> The dendrites of a neuron receive inputs from nearby neurons. This input is binary and either states activation or no activation. If multiple dendrites receive activation at about the same time, the receiver-neuron sends activation to other neurons. The connection from the sending neurons will be strengthened.
+Thereby the output from a neuron indicates whether it has received enough input at the time.
+
+A pattern as a specific combination of values has no meaning in itself. It is easy to detect frequent combination of values in a stream of input. But it is much harder to find frequent transitions of patterns 
+Now the problem that poses is the following: How do I optimize at the same time the definition of useful patterns as well as the selection from these patterns in order to make strong predictions?
+
+There are different kinds of connections
+- A synapse is a connection that receives input and forwards a prediction to a connected unit
+- A state forward connection
+	-> There should be a type of connection for simply forwarding the state/predictive state of one unit into another
+
+There are 3 types of ports
+- input port (receiving some type of information)
+- prediction port (receives a prediction)
+- output port (delivers the current state of a unit (either some internal state or the predictive state))
+
+Predictive units have
+- input port
+- output port
+
+Units to be predicted have
+- prediction port
+- output port
+
+possibility: every output port can return values within a certain time interval (e.g t-4)
+			 - prediction port receives t that indicates for which timestep the prediction is. 
+
+FeatureUnit: receives input from k units, learns the most frequent configuration, state 1 everytime this combination comes up
+
+SynapseCollectionUnit: Unit connects all featurePatterns with one input using synapses. Eventually those synapses are deleted that provide poor performance => not necessary to add random connections
+
+
+The strategy of Potential Synapses (or alike for other units) is very promising since it provides a safe method for monotonusly optimizing some score. The basic idea is, to always have one additional predictive unit that is simulated but which does not contribute to any decisions. After each set the performance of this potential unit is evaluated. If it exceeds the performance of the worst element, they are replaced. For the next round another random potential unit is initialized. 
+
+
+Event Structure
+- Units can add event-listerne to other unit and receive data when a certain conditions apply
+	-> unitX.add_event_listener("event_name", this.add_activation)
+	-> unitX.add_event_listener( () => this.activation>threshold || this.children.length>10, this.my_update_function)
+
+
+How does unitx access input from unity
+- unity fires event on unitx and passes argument
+- unitx makes access of unity
+
+Should unit have states?
+- yes
+- 
+
+model performs the following steps:
+- set_input (input units are set to inpus)
+- activate() => propagate activation
+- integrate()
+- feedback(output)
+- update()
+
+set_input(input)
+propagate_activation()
+-> get output_state from input_unit
+set_output(output)
+feedback()
+-> every unit with predictive input returns true or false whether or not the signal matched with the actual output
+update()
+-> based on statistics, make changes to the internals of the unit
+
