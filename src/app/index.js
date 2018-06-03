@@ -27,3 +27,5 @@ export {
 	ActivationLogger,
 	EventLogger
 };
+
+test
