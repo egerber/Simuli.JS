@@ -1,0 +1,8 @@
+Timing of the feedback signal
+- timestep gets incremented after first group gives feedback => it receives feedback in timestep+1, whereas the other unit receives feedback at the same timestep 
+-> trigger feedback from session 
+
+
+When apply_feedback, compute_output, etc. are passed through the constructor function, it may not set the methods as class methods, instead as individual methods for each instance. This may create memory problems. Furthermore V8 cannot optimize these function calls since there are too many different types of instances from the same class (Unit)
+-> Is it possible to create new classes at runtime?
+

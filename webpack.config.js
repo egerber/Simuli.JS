@@ -12,7 +12,10 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        include: path.resolve(__dirname, 'src'),
+        include: [
+          path.join(__dirname, 'src'),
+          path.join(__dirname, 'test')
+        ],
         exclude: /(node_modules|bower_components|build)/,
         use: {
           loader: 'babel-loader',
@@ -20,33 +23,7 @@ module.exports = {
             presets: ["es2015","stage-2"]
           }
         }
-      },
-      {
-          test:/\.css$/,
-          loader:'style-loader!css-loader'
-      },
-      {
-          test: /\.less$/,
-          use: [{
-              loader: "style-loader" // creates style nodes from JS strings
-          }, {
-              loader: "css-loader" // translates CSS into CommonJS
-          }, {
-              loader: "less-loader" // compiles Less to CSS
-          }]
-      },
-      { 
-          test: /\.(png|woff|woff2|eot|ttf|svg)$/, 
-          loader: 'url-loader?limit=100000' 
       }
-
     ]
-  },
-  plugins:[
-    new webpack.ProvidePlugin({   
-        jQuery: 'jquery',
-        $: 'jquery',
-        jquery: 'jquery'
-    })
-  ]
+  }
 };

@@ -1,20 +1,40 @@
-DynamicVariable-Framework using Proxies, override getters and setters => every variable can be converted into a dynamic variable (e.g. delayed) without having to apply any changes to the lines of codes that use the variable
-
-e.g. RelativeArray(all values are automatically returned normed);
-
-avoid running iterations explicitly. Instead execute epochs
-
 Add Seed functionality for whole algorithm in order to retrack the behavior in different runs
+-> Every random generation call must be done via a fixed function which implements the seed-functionality. Otherwise there will be no seed
 
-Run several configurations against each other and plot resutls
-
-In general attempt to make every component of the model interchangeably so it can be replaced and cross-tetsed with a different version (e.g. with replacement or without, replacement of winner vs. competition for ressource)
-
-Configuration Testing Environment
+Configuration Testing Environment-
 - run configuration several times over a specified number number of timesteps. Visualize results against each other. Calculate standard deviation between runs
 - run several configurations against each other (averaged out). plot results against each other
 	-> including different algorithms
 
+principle for achieving nesting of units
 
-Factory methods: cache instances that have been previously created and provide clone of them
+Make a test of impementing a discrete spiking neural network
+
+Rename "Unit" to "Component", "Element", or "Node"
+
+Session.reset()
+
+Rename inputs to input or figure out a uniform and consistent form of setting inputs between units
+
+TODAY:
+- on_input_changed 																									(DONE)
+- session.get_data("csv","json", etc.)																				(NOSENSE)
+
+TODO
+- add_input()																										(DONE)
+- remove_input(index)																								(MUST CHECK IF IT MAKES SENSE)
+- test feedback logic in looped system
+- rename model to network																							(DONE)
+- send_feedback is processed depending on the corresponding input value												(DONE)
+- Session delete_unit, network delete unit_types 																	(DONE)
+- log units by groups instead of unit_types		 																      
+- Connection works with type (RESET -via set_inputs and APPEND - via add_input)										(DONE)
+- system connects member through .connect(connection_obj)		 													(DONE)
+- session.define_component("Name", Specification);																	(DONE)
+- rename unit to comonent 																							(DONE)
+- describe tick() as fundament of the framework																		(DONE)
+
+TODAY
+- differentiate feedforward and feedback connections
+- 
 
