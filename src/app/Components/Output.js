@@ -16,8 +16,8 @@ export default class Output extends Component{
 	}
 
 	//special
-	compute_feedback(input,output,state,feedback){
-		return feedback;
+	compute_feedback(output_target,state=this.state,output=this.output){
+		return output;
 	}
 
 }

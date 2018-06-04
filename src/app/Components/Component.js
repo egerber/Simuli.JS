@@ -1,11 +1,14 @@
 import Selector from '../Selector/Selector';
 import _ from 'lodash'; 
 import DynamicVariable from '../DynamicVariables/DynamicVariable';
+import ComponentManager from './ComponentManager';
 
 export default class Component{ //prototype of all components in a model
 
 	static default_init_state={"timestep": 1};
 	static default_events=[];
+	//keeps track of how many components have been initialized
+	static countInstances=0;
 
 	constructor({
 			count_outputs=1,
@@ -26,8 +29,11 @@ export default class Component{ //prototype of all components in a model
 		this.max_inputs=max_inputs;
 		this.count_outputs=count_outputs;
 
+		//array of components from which feedforward-signal is received
 		this._inputs=[];
-		
+		//array of components to which feedback signal is sent
+		this._feedback_inputs=[];
+
 		//overrides behavioral methods of components if specified
 		if(compute_output!=null){
 			this.compute_output=compute_output;
@@ -56,15 +62,10 @@ export default class Component{ //prototype of all components in a model
 
 	}
 
-	
-
 	//this method is called for every time step of the parent component
 	tick(){
 
-		//omit feedback for first time ste
-		if(this.hasInputs()){
-			this._send_feedback();
-		}
+		this._receive_feedback();
 
 		for(let dyn_var of _.values(this.state.__dynamic_properties)){
 			dyn_var.tick();
@@ -77,11 +78,14 @@ export default class Component{ //prototype of all components in a model
 	}
 
 	//perform state changes based on received feedback
-	apply_feedback(output=this.output,state=this.state,feedback=null){
+	apply_feedback(feedback=null,state=this.state,output=this.output){
 	}
 
 	//is called if the _inputs is deleted
-	on_input_deleted(index){
+	on_input_deleted(component_id){
+		let index=_.findIndex(this._inputs,component_id);
+		this._inputs.splice(index,1);
+		this.on_input_changed(index,null);
 	}
 
 	//is called when one input is changed
@@ -94,25 +98,30 @@ export default class Component{ //prototype of all components in a model
 		return null;
 	}
 
-	/*
-	defined in constructor as null
-	compute_feedback(input_value,output_value,state,feedback_given){
+	//returns the feedback that is passed to the target component 
+	compute_feedback(target_output,state=this.state,output=this.output){
+		return null;
 	}
-	*/
+	
 
-	set_input(input, index=0){
+	set_input(component, index=0){
 		if(index>this.max_inputs){
 			throw("Error: tried to set input for index ",index," but only ", this.max_inputs, " inputs allowed");
 		}
 
-		this._inputs[index]=input;		
+		this._inputs[index]=component.id;		
 
 		//notify change of input at given index
-		this.on_input_changed(index,input);
+		this.on_input_changed(index,component);
 		//notify for structure logger that a connection was updated
 		this.connection_dirtybit=true; 
 
 	}
+
+	add_feedback_input(component){
+		this._feedback_inputs.push(component.id);
+	}
+
 
 	/*
 	adds a new input to the input port if a new port exists
@@ -122,7 +131,7 @@ export default class Component{ //prototype of all components in a model
 			this.set_input(input,this._inputs.length);
 		}else{
 			for(let i=0;i<this._inputs.length;i++){
-				if(this._inputs[i]==null){
+				if(this._inputs[i]==undefined){
 					this.set_input(i,input);
 					return;
 				}
@@ -137,26 +146,12 @@ export default class Component{ //prototype of all components in a model
 	}
 
 	/*
-	feedback contains the current feedback value received
-	if feedback==null, the feedback sending is triggered by the tick method
-	*/
-	_send_feedback(feedback=null){
-		if(this.compute_feedback==null){ //prevent sending empty feedback
-			return;
-		}
-
-		//compute individual feedback signal for each input
-		for(let input of this._inputs){
-			input._receive_feedback(this.compute_feedback(input.output,this.output,this.state,feedback));
-		}
-	}
-
-	/*
 	@param feedback
 	*/
 	_receive_feedback(feedback){
-		this.apply_feedback(this.output,this.state,feedback);
-		this._send_feedback(feedback); //upon every feedback signal received, send feedback signal to inputs
+		for(let feedback_input of this.feedback_inputs){
+			this.apply_feedback(feedback_input.compute_feedback(this.output));
+		}
 	}
 
 	//marks the begin of the evaluation of the output in order to prevent circular calls
@@ -194,13 +189,16 @@ export default class Component{ //prototype of all components in a model
 		}
 	}
 
+	set feedback_outputs(components=[]){
+		this._feedback_outputs=components;
+	}
+
 	/*
 	technically redundant to set_input
 	sets the input references to the component
 	*/
 	set inputs(inputs=[]){
 		
-		this._inputs=[];
 		//notify if previously defined input ports are un-set
 		let count_new_inputs;
 		let count_old_inputs=this._inputs.length;
@@ -231,7 +229,11 @@ export default class Component{ //prototype of all components in a model
 	returns an array of input references to the component
 	*/
 	get inputs(){
-		return this._inputs;
+		return ComponentManager.get_ids(this._inputs);
+	}
+
+	get feedback_inputs(){
+		return ComponentManager.get_ids(this._feedback_inputs);
 	}
 
 	set output(output_value){
@@ -249,9 +251,9 @@ export default class Component{ //prototype of all components in a model
 	//returns the current input values to the cell
 	get input_values(){
 		if(this._inputs.length==1){ //for single input, pass over input value "by value" instead of "by array"
-			return this._inputs[0].output;
+			return this.inputs[0].output;
 		}else{
-			return this._inputs.map(input => input.output);//pass over input values "by array"
+			return this.inputs.map(input => input.output);//pass over input values "by array"
 		}
 	}
 
@@ -331,6 +333,3 @@ export default class Component{ //prototype of all components in a model
 	}
 
 }
-
-//keeps track of how many components have been initialized
-Component.countInstances=0;

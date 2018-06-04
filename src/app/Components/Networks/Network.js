@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import Component from '../Component';
-import ComponentFactory from '../ComponentFactory';
+import ComponentManager from '../ComponentManager';
 import Input from '../Input';
 import Output from '../Output';
 import Selector from '../../Selector/Selector';
@@ -70,7 +70,9 @@ export default class Network extends Component{
 		if(!this.groups.hasOwnProperty(group_name)){
 			return [];
 		}else{
-			let filtered=this.groups[group_name].filter(filter_func);
+			//resolve indices
+			let group_items=ComponentManager.get_ids(this.groups[group_name]);
+			let filtered=group_items.filter(filter_func);
 			if(quantity==-1){
 				return filtered;
 			}else{
@@ -91,7 +93,7 @@ export default class Network extends Component{
 			}
 		}
 
-		let new_components=Array.from({length:quantity},(x)=>ComponentFactory.create(component_type,component_args));
+		let new_components=Array.from({length:quantity},(x)=>ComponentManager.create(component_type,component_args));
 	
 		//Push created components to groups
 		for(let group of groups){
@@ -105,18 +107,6 @@ export default class Network extends Component{
 
 	delete(component_delete){
 
-		//delete all input references to the component
-		for(let components of _.values(this.groups)){
-			for(let component of components){
-				let inputs=component.inputs;
-				for(let i=0;i<inputs.length;i++){
-					if(inputs[i] === component_delete){
-						component.on_input_deleted(i); //notify all components that reference a component to be deleted
-					}
-				}
-			}
-		}
-
 		//delete the reference from the group
 		for(let group_name of _.keys(this.groups)){
 			let index=_.findIndex(this.groups[group_name],component_delete);
@@ -125,8 +115,8 @@ export default class Network extends Component{
 			}
 		}
 
-		//delete the session instance
-		ComponentFactory.delete(component_delete);
+		//delete the session instance + resolve all links to it
+		ComponentManager.delete(component_delete);
 
 	}
 
@@ -164,15 +154,34 @@ export default class Network extends Component{
 
 		let pairs=connection.mapper(src_components,target_components);
 
-		if(connection.type=="Reset"){
+		//reset all existing feedforward and feedback connections
+		if(connection.reset){
 			for(let target of target_components){
 				target.inputs=[];
 			}
+			for(let source of src_components){
+				source.feedforward_outputs=[];
+			}
 		}
 
-		for(let pair of pairs){
-			pair[1].add_input(pair[0]);
+		if(connection.type=="feedforward"){
+			for(let pair of pairs){
+				pair[1].add_input(pair[0]);
+			}
+		}else if(connection.type=="feedback"){
+			for(let pair of pairs){
+				pair[0].add_feedback_output(pair[1]);
+			}
+		}else if(connection.type="bidirectional"){
+			for(let pair of pairs){
+				pair[1].add_input(pair[0]);
+				pair[0].add_feedback_output(pair[1]);
+			}
+		}else{
+			throw(`The connection type ${connection.type} does not exist`);
 		}
+
+
 	}
 
 	compute_output(inputs,state){

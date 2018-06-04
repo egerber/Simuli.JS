@@ -2,9 +2,7 @@ import _ from 'lodash';
 
 import Network from '../src/app/Components/Networks/Network';
 import Components from '../src/app/Components/ComponentTypes';
-import Ressource from '../src/app/Ressource/Ressource';
 import Selector from '../src/app/Selector/Selector';
-import Winner from '../src/app/Ressource/Winner';
 import Event from '../src/app/Event/Event';
 import Connection from '../src/app/Connection/Connection';
 import Mapper from '../src/app/Mapper/Mapper';
@@ -12,7 +10,7 @@ import Session from '../src/app/Session/Session';
 
 describe("Network",function(){
 
-	//define session in order to prevent error from ComponentFactory
+	//define session in order to prevent error from ComponentManager
 	let session=new Session();
 
 

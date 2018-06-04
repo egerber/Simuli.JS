@@ -1,6 +1,8 @@
 import Competition from '../src/app/Competition/Competition';
+import _ from 'lodash';
 
 describe("Competition", function(){
+	
 
 	it("WinnerTakesAll",function(){
 		var collection=[

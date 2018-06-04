@@ -1,6 +1,6 @@
 import Session from '../src/app/Session/Session';
 import System from '../src/app/System/System';
-import ComponentFactory from '../src/app/Components/ComponentFactory';
+import ComponentManager from '../src/app/Components/ComponentManager';
 import Monitor from '../src/app/Monitor/Monitor';
 import StateLogger from '../src/app/Monitor/StateLogger';
 import EventLogger from '../src/app/Monitor/EventLogger';

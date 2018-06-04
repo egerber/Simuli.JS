@@ -15,8 +15,4 @@ export default class Input extends Component{
 		return this._output;
 	}
 
-	reset(){
-		super.reset();
-	}
-
 }

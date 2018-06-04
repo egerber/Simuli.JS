@@ -1,4 +1,4 @@
-import ComponentFactory from '../Components/ComponentFactory';
+import ComponentManager from '../Components/ComponentManager';
 import _ from 'lodash';
 
 
@@ -20,7 +20,7 @@ export default class System{
 	}
 
 	add_component(component_type, args={},name=undefined){
-		let component=ComponentFactory.create(component_type, args);
+		let component=ComponentManager.create(component_type, args);
 
 		if(name==undefined){
 			this.components[_.values(this.components).length]=component; //add component in with the index of the next slot

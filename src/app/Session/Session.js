@@ -1,6 +1,6 @@
-import ComponentFactory from '../Components/ComponentFactory';
+import ComponentManager from '../Components/ComponentManager';
 import _ from 'lodash';
-
+import DirectedGraph from '../Graph/DirectedGraph';
 
 export default class Session{
 
@@ -14,8 +14,13 @@ export default class Session{
 
 		this.specifications={}; //saves specifications of component types in the form {component_name: spec,...}
 
+		this.graph_feedforward=new DirectedGraph();
+		this.graph_feedback=new DirectedGraph();
+
+		this.instances={}; //array of all existing instances in the current session (index referes to id)
+
 		this.component_instances={};//flat arrays of components in the current session by type
-		ComponentFactory.set_active_session(this);
+		ComponentManager.set_active_session(this);
 	}
 
 	define_component(component_name, specification){
@@ -39,7 +44,7 @@ export default class Session{
 			throw("Error: system cannot be null");
 		}
 		//notify component factory that all new instantiations belong to the context of this session
-		ComponentFactory.set_active_session(this);
+		ComponentManager.set_active_session(this);
 
 		for(let i=0;i<iterations;i++){
 			this.system.tick();
@@ -50,25 +55,46 @@ export default class Session{
 		return this;
 	}
 
-	add_component(component_ref,component_type){
+	add_component(component){
 		
-		if(!this.component_instances.hasOwnProperty(component_type)){
-			this.component_instances[component_type]=[component_ref];
-		}else{
-			this.component_instances[component_type].push(component_ref);
-		}
+		this.instances[component.id]=component;
 	}
 
 	/*
 	TODO: make more efficient
 	*/
-	delete_component(component_delete){
-		
-		let component_type=component_delete.constructor.name;
-		let count_components=this.component_instances[component_type].length;
+	delete_component(component){
+		let adj_input=this.graph_feedforward.children_nodes(component.id);
+		let adj_feedback=this.graph_feedback.children_nodes(component.id);
 
-		let index=_.findIndex(this.component_instances[component_type],component_delete);
-		this.component_instances[component_type].splice(index,1);
+		//notify elements that receive feed forward input from the deleted component
+		for(let index of adj_input){
+			this.instances[index].on_input_delete(index);
+		}
+
+		//notify elements that receive feedback input from the deleted component
+		for(let index of adj_feedback){
+			this.instances[index].on_input_delete(index);
+		}
+
+		delete this.instances[component.id];
+
+	}
+
+	add_connection(id_from, id_to,type){
+		if(type=="feedforward"){
+			this.graph_feedforward.add_edge(id_from,id_to);
+		}else if(type=="feedforward"){
+			this.graph_feedback.add_edge(id_from, id_to);
+		}
+	}
+
+	remove_connection(id_from,id_to,type){
+		if(type=="feedforward"){
+			this.graph_feedforward.remove_edge(id_from,id_to);
+		}else if(type=="feedback"){
+			this.graph_feedback.remove_edge(id_from,id_to);
+		}
 	}
 
 	log(){
@@ -128,6 +154,27 @@ export default class Session{
 	//loads session from file/database and returns session reference
 	static restore_from(uri){
 
+	}
+
+
+	/*
+	testwise: working without objects
+	*/
+	tick2(){
+		let order_feedback=this.graph_feedback.order;
+
+		for(let index of order_feedback){
+			let instance=this.instances[index];
+			let schema=this.schemas[instance.schema_type];
+			
+			
+		}
+	}
+
+	invoke_feedback(schema,index){
+		for(let index_feedback of this.graph_feedback.inputs(index)){
+			schema.apply_feedback()
+		}
 	}
 }
 

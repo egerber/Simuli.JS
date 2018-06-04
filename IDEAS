@@ -113,3 +113,128 @@ compute_feedback ~ output,state
 
 apply_feedback ~ output, state, feedback
 
+compute_feedback(my_output, target_output,state)
+
+What is the meaning behind ComponentManager if it routes all calls to session?
+- globally accessible
+- creates local as well as 
+- actually performs the requests, session only stores information
+- implements the logic for pooling/reuse and all kinds of optimization
+
+Problem:
+- currently feedback_outputs are saved by the sender. In order to delete all feedback references, the receiving unit must have a link to the items it receives input from
+	-> handle by ComponentManager
+	-> save feedback_inputs in receiver unit itself and invoke compute_feedback() in sender component
+		->feedback_input.feedback (general feedback)
+		->feedback_input.compute_feedback(this.output,feedback_input.output,feedback_input.state) (individual feedback)
+
+In what order should the feedback be given?
+- higher level component receives feedback first
+
+save InAdj List
+save OutAdj List
+
+network topology not possible for cyclic graph
+-> all connections must be acyclic (big constraint)
+-> consider the order of creation, the later create, the higher order ()
+-> members in groups cannot be acyclical
+
+Is there a use of cyclical connections since cyclical feedback connections are possible?
+- all cyclical connections can be functionally resolved in a non cyclical form
+
+FIANAL GOAL
+- completely indexed based system, remove all instances,
+
+- convert the whole system away from a object notation and perform matrix operations
+
+for all elements of network part compute
+- output(state,input,etc.)
+
+requires
+- order all nodes into groups of the same hierarchy (topolgy)
+- for each group, provide all input values necessary (input_values)
+	- retrieve all states of the group
+	- output -> compute_feedback(input_values, state) for all members of the group
+	- save outputs to network activation values
+
+? What is the complexity of recalculating the topololgy of a network, given a connection change?
+
+
+schema	
+	-tick()
+	-compute_output
+	-compute_feedback
+	-apply_feedback
+	-on_input_changed
+	-events
+	-feedforward-inputs
+	-feedback-inputs
+network_schema extends:
+	-groups
+	-create
+	-select
+
+network instances (ordered by schema)
+	-states[]
+	-current_outputs[]
+	-graph (ff inputs, fb inputs)
+
+
+session saves
+- units by type: {type: indices}
+- units by group: {name: indices}
+- units 
+
+for all groups in hierarchy (descending)
+	for all group members
+		for all feeback inpus
+			apply_feedback(compute_feedback(current_outputs[member], current_outputs[feedback_input], state[feedback_input])
+for all groups in hierarchy ascending
+	for all group members
+		tick(state[member])
+		handle_events[member]
+		output <- compute_output(current_outputs[inputs])
+
+problems:
+	-how to pass object reference to unit in events (e.g. for calling ref.create("dfdfa",{}, etc.))
+		-> network builds sub topology
+		-> create, select is method of that topology and adds
+		-> network instance exists 
+	-
+
+add_connection(x,y)
+- case 1: (x < y)
+	nothing
+- case 2: (x > y && no cycle)
+- case 3: (x > y && creates cycle)
+
+remove_connection(x,y)
+- case 1 (cycle resolved)
+- case 2 (no cycle existed)
+	- nothing
+
+
+Problem1:
+- network provides functions select, create,etc.
+- network allows to access components and set inputs (e.g. component1.inputs=component2)			(SOLVED)
+	-> work with connection object (set_connection(component1, component2))
+- feedback requires items to call compute_feedback on the sender components (schema not known)
+	-> work with graph data and invoke sending
+		-> same problematic with apply_feedback
+	-> compute feedback and provide to be accessed my component itself current_feedbacks[]
+	-> first step: keep object instances but call all methods externally
+
+global fields
+- inputs[id]=[id1,id2,id3]
+- feedback_inputs[i]=[idx,idy,idz]
+- states[i]={prop1,prop2,prop3}
+- schemas[i]={compute_feedback, compute_output, events,...}
+
+What is the advantage of this whole approach?
+- less recursion
+- better control over flow of information
+- less memory
+- faster?
+
+
+
