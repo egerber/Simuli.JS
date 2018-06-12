@@ -1,0 +1,91 @@
+INDEXED APPROACH
+
+select() function cannot return objects
+	-> returns ids, can be used by connection
+select() function cannot access state properties/input properties of units
+	-> select() function internally takes the state properties
+	-> state properties include properties
+		- count_input_slots
+		- used_input_slots
+		- count_feedback_slots
+		- used_feedback_slots
+	> [each schema holds individual method for calling events]
+
+select() and create() should not be part of state object
+passing as extra arguments from event.action requires specific behavior for network
+	-> treat network as sub system and apply specific behavior
+
+
+How to deal with arbitrary long signal delays/where should values be stored?
+	-> keep output values in different array and vary 
+		- store unnecessary values
+	-> keep connections in the form {from: 1, to:2, delay:10} and correspondingly  [0,0,0,1,0,0,0,0,1,1] etc.
+		- redundant information + lots of memory use
+	-> analyse which unit gets accessed with what delay and keep respective array with data over various timesteps
+		- complicated when connections are changed
+
+How to deal with delay0 connections
+	-> call ids in topological order from graph (includes sub graph)
+
+how to compute output from network component based on outputs of group "output"
+-> set inputs of network to group "output" and compute_output returns identical output values
+
+connection object has no information over groups given as name (e.g. target: "Input")
+-> all calls must be done via select (e.g. target: select("Input"))
+	- how can system components be accessed?
+		-> implement select method for system schema 
+			- doesnt solve the problem of accessing members by groupname
+				-> saving group names publicly (good for logging)
+					- allows cross system access
+						-> inject additional parameter to select() and create() call which references the ids of all group members 
+							- not possible since the functions are passed as an argument already
+								-> groups are part of the state object (hidden)
+									- groups aren't part of the state
+										-> define new create function (currying) and pass it to event handler
+										-> network IS system and exists as instance 
+											- how to deal with nested systems?
+
+
+how to setup new components (e.g init(), init_state)?
+	-> 
+
+How to dynamically keep track of network topology upon setting up and deleting connections
+	-> 
+
+How to compute the graph topology with partially dealyed and direct connections?
+	-> topology ignores delayed connections and adds them last since they don't need to be called in fixed order
+
+How to define a schema which extends/modifies a currently existing schema (e.g. network functionality with create/select)
+	-> 
+
+apply_feedback(output,state,feedback) does not make sense when feedback is delayed, but also cannot link all outputs together
+	-> save the output value of the feedback recipient together with the corresponding feedback value
+	-> apply feedback regardless of the output that was given
+
+Sometimes a component produces an array-output. Another component should be able to reference some index of this input (e.g array input -> network)
+	-> every component specifies number of output ports (MUST correlate with the length of the output array)
+		- how to decide which port should be used when connnecting such a unit to another?
+			-> all units used unless
+			-> use different type of connection
+			-> process input in network allows to set input values
+			-> define unit that broadcasts an array of values into different units
+				- how?
+			-> Mapper considers each output or input port as target
+
+Should System Object have an output value?
+	-> yes, in order to enable nesting at a later stage	
+	-> 
+
+How should on_input_deleted be notified?
+	-> call session.delete_connection/session.delete_node, session calls executer, executer calls on_input_deleted
+		- repeated calls when collective delete is operated 
+			-> could implement method like delete_multiple([id1, id2, id3])
+
+
+How to manage init() for system?
+-> special case implemented in componentFactory: adds children and selection of groups
+	- how does select/create have access to groups and their ids?
+		-> state.groups returns selection which contains a field of all ids connected to a group
+		   create triggers ComponentFactory.create and adds ids into these fields
+
+		   

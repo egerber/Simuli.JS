@@ -115,22 +115,6 @@ apply_feedback ~ output, state, feedback
 
 compute_feedback(my_output, target_output,state)
 
-What is the meaning behind ComponentManager if it routes all calls to session?
-- globally accessible
-- creates local as well as 
-- actually performs the requests, session only stores information
-- implements the logic for pooling/reuse and all kinds of optimization
-
-Problem:
-- currently feedback_outputs are saved by the sender. In order to delete all feedback references, the receiving unit must have a link to the items it receives input from
-	-> handle by ComponentManager
-	-> save feedback_inputs in receiver unit itself and invoke compute_feedback() in sender component
-		->feedback_input.feedback (general feedback)
-		->feedback_input.compute_feedback(this.output,feedback_input.output,feedback_input.state) (individual feedback)
-
-In what order should the feedback be given?
-- higher level component receives feedback first
-
 save InAdj List
 save OutAdj List
 
@@ -199,8 +183,7 @@ problems:
 	-how to pass object reference to unit in events (e.g. for calling ref.create("dfdfa",{}, etc.))
 		-> network builds sub topology
 		-> create, select is method of that topology and adds
-		-> network instance exists 
-	-
+		-> network instance exists
 
 add_connection(x,y)
 - case 1: (x < y)
@@ -214,15 +197,13 @@ remove_connection(x,y)
 	- nothing
 
 
-Problem1:
+Problems:
 - network provides functions select, create,etc.
+	->provide create and select method inside event (or: as part of state)
 - network allows to access components and set inputs (e.g. component1.inputs=component2)			(SOLVED)
-	-> work with connection object (set_connection(component1, component2))
-- feedback requires items to call compute_feedback on the sender components (schema not known)
-	-> work with graph data and invoke sending
-		-> same problematic with apply_feedback
-	-> compute feedback and provide to be accessed my component itself current_feedbacks[]
-	-> first step: keep object instances but call all methods externally
+	-> NEVER ALLOW DIRECT ACCESS TO A COMPONENT, ONLY WORK WITH SIGNALS
+-compute feedback and provide to be accessed my component itself current_feedbacks[]
+	-> Pre-catch values and feed into functions
 
 global fields
 - inputs[id]=[id1,id2,id3]
@@ -238,3 +219,140 @@ What is the advantage of this whole approach?
 
 
 
+Ideally connect items in the following manner
+- network.select("type", cirteria_xyz).connect(network.select("type",...), type="bidirectional",reset_ports=false)
+
+
+Connection
+- from (label or array)
+- to (label or array)
+- type (feedforward or feedback)
+- reset_slots (true or false)
+- mapper (Selection from mappers or own mapper -> returns (i,j) for all given items (i, j refer to index positions within array or group))
+- signal_delay (0 - forward signal at same timestep, 1 - forward signal at next timestep, k - forward signal after k time steps)#
+- [frequency] (forward signal every k timesteps?)
+
+graph can compute groups that can be computed parallel
+
+Session could save links (from,to,delay) and provide all input values to respective sessions
+- calling 
+
+
+nesting:
+- create subgraph in graph
+- if index of node could not be found
+	- forward call to sub graph
+
+
+General algorithm
+check events
+
+FEEDBACK
+- acquire all feedback values (compute_feedback())
+- call apply_feedback
+FEEDFORWARD
+- acquire all output values from previous step
+- call compute_output
+
+
+save inputs as adjacency matrix
+{
+	0: 1,2,3,4,5
+	1: ...
+}
+
+
+delay adjacency matrix
+{
+	0: 0,0,0,0,1,
+	1: ...
+}
+
+provide all inputs
+{
+	0: [10,100,145,267],
+	...
+}
+
+for all elements (grouped by schema) call
+- compute_output -> save result
+	-> problem: for delay=0 must call item in order
+		-> do not allow delay=0
+		-> 
+same for feedback
+
+
+
+push inputs onto component, instead of setting specific ports
+
+
+Problem: how to notify deletion of connection?
+
+
+Istead of storing seperate fields of unit in different arrays use one array of various objects
+- var components=[
+{schema:network_spec, state={timestep:0, count_slots:4}, current_output: 10, last_output:100}
+{schema:synapse_spec, state={timestep:0, count_slots:1}, current_output: 1, last_output:-10}
+]
+
+save topology as array: [0,10,20,21,22,23,...]
+
+Save Network as the category "SubSystems"
+
+Components can access a public state as well as a attributes object that is shared among all components of the same type
+
+Const state attributes (e.g max_slots inputs -> overriding accessor, make writeable only (__const_variables, __dynamic properties))
+
+
+--------------
+Pseudocode for running indexed version
+
+//tick
+for id of ids
+	components[id].state.timestep++;
+	if(components[id].schema.condition(state)){
+		if(schema==network)
+			component[id].schema.action(state,create_func,select_func)
+	}
+
+for id of ids
+	last_output[id]=current_output[id]
+	current_output=new Array() //or do not touch 
+
+for id of components orderBy topology
+	input_values=new Array(count_input_values)
+		for input_id of inputs
+			if(delayed)
+				input[]=last_output[]
+			else
+				input[]=current_output[]
+	
+	current_output[id]=component[id].schema.compute_output();
+
+- same for feedback
+
+replace init_state by state
+
+create spatial sensitive groups (e.g. Multidimensional arrays for images)
+- allow connections to be formed with regard to the spatial extent of the image
+
+connection object works with selection object
+selection object has
+- elements[]
+- select() - ? (sort instead)
+- filter
+
+specify the ports of two elements that connect with each other
+- group_connection (maps between elements of 2 groups)
+- component_connection (maps between elements of 1 groups and ports of element)
+
+should connections be saved in a different format? 
+
+ConnectionManager
+- add_connection()
+- remove()
+
+
+No need for System component()
+Instead: allow how to set inputs in network component
+- 

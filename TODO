@@ -36,5 +36,12 @@ TODO
 
 TODAY
 - differentiate feedforward and feedback connections
+
+
+Implement graph which can handle sub graphs
 - 
 
+Finish instance based implementation
+- call tick()
+- call compute_delayed_output_value
+- call compute_output()

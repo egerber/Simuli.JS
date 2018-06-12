@@ -1,6 +1,6 @@
 import Session from '../src/app/Session/Session';
 import System from '../src/app/System/System';
-import ComponentManager from '../src/app/Components/ComponentManager';
+import ComponentFactory from '../src/app/Components/ComponentFactory';
 import Monitor from '../src/app/Monitor/Monitor';
 import StateLogger from '../src/app/Monitor/StateLogger';
 import EventLogger from '../src/app/Monitor/EventLogger';
@@ -20,7 +20,7 @@ describe("Session", function(){
 		let func_instantiate=function(){
 			session
 			.set_system(new System()
-				.add_component("PeriodicPattern",{max_inputs:1},"input1")
+				.add_component("PeriodicPattern",{slots_input:1},"input1")
 				.add_component("Synapse",{},"synapse1")
 				.add_component("Synapse",{},"synapse2")
 				.connect("input1","synapse1")
@@ -44,7 +44,7 @@ describe("Session", function(){
 		let session=new Session("test_logging")
 			.define_component("Synapse",synapse_spec)
 			.set_system(new System()
-				.add_component("PeriodicPattern",{max_inputs:1},"input1")
+				.add_component("PeriodicPattern",{slots_input:1},"input1")
 				.add_component("Synapse",synapse_spec,"synapse1")
 				.add_component("Synapse",synapse_spec,"synapse2")
 				.connect("input1","synapse1")
@@ -70,13 +70,13 @@ describe("Session", function(){
 	it("Spiking Neural Network",function(){
 		
 		let pattern_generator_spec={
-			max_inputs:10,
+			slots_input:10,
 			count_outputs:10,
 			period:15
 		}
 
 		let neuron_spec={
-			max_inputs:5,
+			slots_input:5,
 			count_outputs:1,
 			init_state:{
 				threshold:5
@@ -101,7 +101,7 @@ describe("Session", function(){
 				increment_amount:0.001, //weight increment when positive feedback
 				decrement_amount:0.0005 //
 			},
-			max_inputs:1,
+			slots_input:1,
 			count_outputs:1,
 			compute_output:function(input,state){
 				return input*state.weight;
@@ -116,7 +116,7 @@ describe("Session", function(){
 		}
 
 		let network_spec={
-			max_inputs:10,
+			slots_input:10,
 			count_outputs:10,
 			init_state:{
 			},
@@ -133,7 +133,7 @@ describe("Session", function(){
 							network.delete(synapse);
 						}
 
-						let open_slots=network.select("Neuron", (neuron)=>neuron.used_inputs<neuron.max_inputs);
+						let open_slots=network.select("Neuron", (neuron)=>neuron.used_inputs<neuron.slots_input);
 						network.establish_connection(new Connection({
 							src:"Input",
 							target:open_slots,

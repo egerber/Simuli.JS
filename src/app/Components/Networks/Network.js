@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import Component from '../Component';
-import ComponentManager from '../ComponentManager';
+import ComponentFactory from '../ComponentFactory';
 import Input from '../Input';
 import Output from '../Output';
 import Selector from '../../Selector/Selector';
@@ -12,7 +12,7 @@ export default class Network extends Component{
 			components={}, //e.g. {"Synapse": {max_count_inputs}}
 			connections=[],
 			init=function(){}
-		}={})
+		}={},session=session)
 		{
 		super(...arguments);
 
@@ -22,7 +22,7 @@ export default class Network extends Component{
 
 		//Object of Lists of member components, structured by group
 		this.groups={
-			"Input":Array.from({length:this.max_inputs},()=>new Input()), //Initial group is input and output components
+			"Input":Array.from({length:this.slots_input},()=>new Input()), //Initial group is input and output components
 			"Output":Array.from({length:this.count_outputs},()=>new Output())
 		};
 
@@ -35,6 +35,9 @@ export default class Network extends Component{
 		}
 	}
 
+	transform_input(inputs){
+		return inputs;
+	}
 
 	apply_feedback(output,state,feedback){
 		
@@ -71,7 +74,7 @@ export default class Network extends Component{
 			return [];
 		}else{
 			//resolve indices
-			let group_items=ComponentManager.get_ids(this.groups[group_name]);
+			let group_items=this.groups[group_name];
 			let filtered=group_items.filter(filter_func);
 			if(quantity==-1){
 				return filtered;
@@ -93,7 +96,7 @@ export default class Network extends Component{
 			}
 		}
 
-		let new_components=Array.from({length:quantity},(x)=>ComponentManager.create(component_type,component_args));
+		let new_components=Array.from({length:quantity},(x)=>ComponentFactory.create(component_type,component_args));
 	
 		//Push created components to groups
 		for(let group of groups){
@@ -116,7 +119,7 @@ export default class Network extends Component{
 		}
 
 		//delete the session instance + resolve all links to it
-		ComponentManager.delete(component_delete);
+		session.delete(component_delete);
 
 	}
 
@@ -157,7 +160,7 @@ export default class Network extends Component{
 		//reset all existing feedforward and feedback connections
 		if(connection.reset){
 			for(let target of target_components){
-				target.inputs=[];
+				target.input_links=[];
 			}
 			for(let source of src_components){
 				source.feedforward_outputs=[];
@@ -166,16 +169,16 @@ export default class Network extends Component{
 
 		if(connection.type=="feedforward"){
 			for(let pair of pairs){
-				pair[1].add_input(pair[0]);
+				pair[1].add_input_link(pair[0]);
 			}
 		}else if(connection.type=="feedback"){
 			for(let pair of pairs){
-				pair[0].add_feedback_output(pair[1]);
+				pair[0].add_feedback_link(pair[1]);
 			}
 		}else if(connection.type="bidirectional"){
 			for(let pair of pairs){
-				pair[1].add_input(pair[0]);
-				pair[0].add_feedback_output(pair[1]);
+				pair[1].add_input_link(pair[0]);
+				pair[0].add_feedback_link(pair[1]);
 			}
 		}else{
 			throw(`The connection type ${connection.type} does not exist`);

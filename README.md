@@ -1,21 +1,26 @@
 # Discrete Dynamic Systems Framework
 
-Dynamic System is a framework for simulating highly dynamic and interactive networks of components. It allows to study emergent and synergic principles in complex networks of interacting components. With XY-framework it is possible to define the detailed behavior of each component as well as the links through which these components are connected with each other. Every behavior or interaction is generically computed based on the state of each component at discrete timesteps. 
-
+Dynamic System is a framework for simulating highly dynamic systems which include many interdependent components. The framework allows to define the detailed behavior of each component as well as the links through they are connected and interact with each other. When the system is simulated, all components and custom events in the system can be tracked and logged for analysis.
 
 ### Features
 - defining components with specific behavior
 - defining systems and simulation of interacting components
 - tracking states/events of system components
 - logging the flow of information inside of a system
-
+- dynamic reconnection of components
+- dynamic creation of new components at runtime
 
 ### Motivation
-The framework was designed to study principles of emergence, self-organization and learning as for example neuronal activity in spiking neural networks or the simulation of artifical ant colonies.
+The framework was designed to study principles of emergence, self-organization and learning such as neuronal activity in spiking neural networks or the simulation of artifical ant colonies.
 The framework aims at simplyfying the process of implementing various types of networks by providing a generic schema for the definition of the behavior of a single component. One paradigm of this framework is to separate the definition of behavior from the parameters through which the behavior is modulated.
 
 ## Introduction
 A system consists of various components which interact which each other by exchanging information between each other. Since the framework is "Discrete", all behavior is defined on the basis of given time steps. The framework synchronizes all components by invoking the method `tick()` in each of them, which notifies the next timestep and triggers corresonding behavior.
+
+
+A system contains components as building block
+A componet is a basic element that is able to receive signals, process signals and send signals. A system is the composition of various (different) components that interact with each other to form a integrative whole. The framework provides a simple schema to define the behavior of a component and makes it possible to easily link components together. All interaction occurs at discrete timesteps. At any given point, all components send out and receive signals.
+There are two types of signals that can be sent among components: feedforward signals, and feedback signals. The combination of these two types of signals allow to model all kinds of interactive systems. At any timestep, feedfoward signals are sent between components. Once all feedforward signals were sent out, feedback signals are propagated through the network. This allows for feedback loops and all kinds of learning 
 
 ### Component
 Components are the key elements of the framework. The class `Component` is the base class for all members in a system. 

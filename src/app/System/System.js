@@ -1,4 +1,4 @@
-import ComponentManager from '../Components/ComponentManager';
+import ComponentFactory from '../Components/ComponentFactory';
 import _ from 'lodash';
 
 
@@ -20,7 +20,7 @@ export default class System{
 	}
 
 	add_component(component_type, args={},name=undefined){
-		let component=ComponentManager.create(component_type, args);
+		let component=ComponentFactory.create(component_type, args);
 
 		if(name==undefined){
 			this.components[_.values(this.components).length]=component; //add component in with the index of the next slot
@@ -50,10 +50,10 @@ export default class System{
 	}
 
 	/*takes the unit "name_sender" as input for name_receiver
-	for type="Reset", deletes all existing inputs before setting the new one
-	for type="Append" appends input to existing inputs
+	if reset==true deletes all existing inputs before setting the new one
+	else, appends input to existing inputs
 	*/
-	connect(name_sender,name_receiver,type="Reset"){
+	connect(name_sender,name_receiver,type="feedforward",reset=true){
 		if(!this.components.hasOwnProperty(name_sender)){
 			throw(`the component ${name_sender} was not defined yet`);
 		}
@@ -62,19 +62,20 @@ export default class System{
 		}
 
 		if(type=="Reset"){
-			this.components[name_receiver].inputs=this.components[name_sender];
+			this.components[name_receiver].input_links=this.components[name_sender];
 		}else{
-			this.components[name_reciever].add_input(this.components[name_sender]);
+			this.components[name_receiver].add_input_link(this.components[name_sender]);
 		}
 
 		return this;
 	}
+
 	set_input_link(name_sender,name_receiver){
 		if(!this.components.hasOwnProperty(name_sender) || !this.components.hasOwnProperty(name_receiver)){
 			throw("System Object does not contain on of the referred components: (",name_sender,", ",name_recevier,")");
 		}
 
-		this.components[name_receiver].inputs=this.components[name_sender];
+		this.components[name_receiver].input_links=this.components[name_sender];
 		return this;
 	}
 

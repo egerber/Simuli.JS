@@ -7,14 +7,14 @@ export default class PeriodicPattern extends Component{
 		super(...arguments);
 
 		if(initial_state.last_input===undefined){
-			this.state.last_input=Array.from({length:this.max_inputs},() => _.random(0,1));
+			this.state.last_input=Array.from({length:this.slots_input},() => _.random(0,1));
 		}
 
 		this.state["period"]=period;
 		this.state["pattern"]=[];
 
 		for(var i=0;i<this.state.period;i++){
-			this.state.pattern.push(Array.from({length: this.max_inputs}, () => _.random(0,1)));
+			this.state.pattern.push(Array.from({length: this.slots_input}, () => _.random(0,1)));
 		}
 	}
 	

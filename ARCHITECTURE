@@ -1,0 +1,156 @@
+datastructure:
+
+output_values:{
+	id: {current_output, old_output}
+}
+
+feedback_values:{
+	id: {current_value, old_value}
+}
+
+feedforward_inputs:{
+	id: [input1, input2, input3]
+}
+
+feedback_inputs:{
+	id: [input1, input2, input3]
+}
+
+components:{
+	id: {schema, state}
+}
+
+graph_feedforward:
+	- adj_list={
+		id: [target1, target2, target3, ...]
+	}
+	- topology
+	:add_edge(from, to, delay)
+
+graph_feedback:
+	-nodes
+	-adj_list={
+		id: [from1, from2, from3]
+	}
+	- delays={
+		id: [delay1, delay2, delay3]
+	}
+	- topology
+	: add_edge(from,to,delay)
+
+session
+	-system (network) - instance
+		- create() 
+		- select()
+		- init(state,create,select,connect)
+		
+	-loggers (no monitor necessary)
+	-ConnectionManager
+	:run(t)
+	:data
+
+OPTIONAL:
+components by type:
+	e.g. {
+		synapse: [id1,id2,id3,...]
+	}
+components by group:
+	e.g.{
+		"group1": [id1,id2,id3,...]
+	}
+
+------
+
+generate_create_func(groups){
+	return function(type,group,...){
+	}
+}
+
+generate_select_func(groups){
+	return function(group, filter, selector,...){
+	}
+}
+
+fetch_input_values()
+
+fetch_feedback_values()
+
+compute_output_values()
+
+apply_feedback_values(feedback_values, components)
+
+tick()
+- increase state.timestep
+- shift current_output to old_output
+- delete current_output
+
+log()
+
+set_connection(from,to,type,delay)
+
+create_component
+ - creates ID
+ - applies init_state/state (extends with standard fields)
+
+ for network:
+ 	- generates input group and output group
+ 	- calls init itself
+
+for id0:
+
+for event:
+ if(condition(state,select))
+ 	action(state,create_select(state),create_create(create),create_apply()){
+
+ 	}
+
+if(condition(state)){
+	action(state){
+		state.children.select("group").filter().sort();
+
+	}
+}
+
+-----------------
+
+session:
+- add_component()
+	- active_session.add()
+- remove_component()
+- add_connection()
+	- session.add_connection()
+- remove_connection()
+
+ComponentManager
+active_session
+:create()
+	- ConnectionManager.add_node()
+:remove()
+	- ConnectionManager.remove_node()
+
+
+
+Executer:
+:execute(graph,components,activationCache)
+:_tick()
+:_fetch_feedforward_inputs()
+:_fetch_feedback_inputs()
+
+:_propagate_feedfoward_activation()
+:_propagate_feedback_activation()
+
+
+--- helper objects
+Selection
+- 
+- ids[]
+:remove()
+:apply()
+:create?
+:filter()
+:select()
+:sort()
+- each function returns another selection (or respectively changes the items included)
+	- work with Object.assign();
+
+

@@ -1,4 +1,4 @@
-import ComponentManager from '../Components/ComponentManager';
+import ComponentFactory from '../Components/ComponentFactory';
 import _ from 'lodash';
 import DirectedGraph from '../Graph/DirectedGraph';
 
@@ -20,13 +20,28 @@ export default class Session{
 		this.instances={}; //array of all existing instances in the current session (index referes to id)
 
 		this.component_instances={};//flat arrays of components in the current session by type
-		ComponentManager.set_active_session(this);
+		ComponentFactory.set_active_session(this);
 	}
 
 	define_component(component_name, specification){
 		this.specifications[component_name]=specification;
 		return this;
 	}
+
+	get_component(id){
+		return this.instances[id];
+	}
+
+	get_components(ids){
+		let length=ids.length;
+		let selection=new Array(length);
+		for(let i=0;i<length;i++){
+			selection[i]=this.instances[i];
+		}
+
+		return selection;
+	}
+
 
 	set_system(system){
 		this.system=system;
@@ -44,7 +59,7 @@ export default class Session{
 			throw("Error: system cannot be null");
 		}
 		//notify component factory that all new instantiations belong to the context of this session
-		ComponentManager.set_active_session(this);
+		ComponentFactory.set_active_session(this);
 
 		for(let i=0;i<iterations;i++){
 			this.system.tick();
@@ -56,7 +71,6 @@ export default class Session{
 	}
 
 	add_component(component){
-		
 		this.instances[component.id]=component;
 	}
 
@@ -97,6 +111,7 @@ export default class Session{
 		}
 	}
 
+	
 	log(){
 		if(this.monitor==null){
 			return;

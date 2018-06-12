@@ -8,11 +8,11 @@ describe("Component",function(){
 		let component=new Component();
 	});
 
-	it("inputs can be set to both Array and single object",function(){
+	it("input_links can be set to both Array and single object",function(){
 		let component1=new Component();
 		let component2=new Component();
-		expect(()=>component1.inputs=component2).not.toThrow();
-		expect(()=>component1.inputs=[component2]).not.toThrow();
+		expect(()=>component1.input_links=component2).not.toThrow();
+		expect(()=>component1.input_links=[component2]).not.toThrow();
 	});
 
 	it("state variables can be set to dynamic variables", function(){
@@ -27,7 +27,7 @@ describe("Component",function(){
 
 	});
 
-	it("set inputs to a component",function(){
+	it("set input_links to a component",function(){
 		let component1=new Component();
 		let component2=new Component();
 		let component3=new Component();
@@ -38,30 +38,48 @@ describe("Component",function(){
 		component2.output=1;
 		component3.output=2;
 
-		let component4=new Component({max_inputs:3});
-		component4.inputs=[component1,component2,component3];
+		let component4=new Component({slots_input:3});
+		component4.input_links=[component1,component2,component3];
 
-		//test set inputs array
+		//test set input_links array
 		expect(component4.input_values).toEqual([0,1,2]);
 
-		//test set inputs single item
-		component4.inputs=component1;
+		//test set input_links single item
+		component4.input_links=component1;
 		expect(component4.input_values).toEqual(0);
 
-		//test set inputs to component with multiple outputs
+		//test set input_links to component with multiple outputs
 		let component_multi=new Component({count_outputs:3});
 		component_multi.output=[0,1,2];
 
-		component4.inputs=component_multi;
+		component4.input_links=component_multi;
 		expect(component4.input_values).toEqual([0,1,2]);
 
 		//test adding components
-		component4.inputs=[];
-		component4.add_input(component1);
-		component4.add_input(component2);
-		component4.add_input(component3);
-		component4.add_input(component3);
+		component4.input_links=[];
+		component4.add_input_link(component1);
+		component4.add_input_link(component2);
+		component4.add_input_link(component3);
+		component4.add_input_link(component3);
 		expect(component4.input_values).toEqual([0,1,2]);
+	});
+
+	it("feedback flow", function(){
+		let component_sender=new Component({
+			compute_feedback: (target_output,state,output)=>10
+		});
+
+		let component_receiver=new Component({
+			apply_feedback:function(feedback,state,output){
+				state.feedback_value=feedback;
+			}
+		});
+
+		component_receiver.add_feedback_link(component_sender);
+
+		component_receiver.tick();
+		expect(component_receiver.state.feedback_value).toBe(10);
+
 	});
 
 });

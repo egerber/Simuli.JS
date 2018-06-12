@@ -19,11 +19,10 @@ describe("System",function(){
 		let func=function(){
 			let system=new System()
 			.add_component("Input",{},"input_1")
-			.add_component("Synapse",{},"synapse_1")
-			.add_component("Synapse",{},"synapse_2")
-			.connect("input_1","synapse_1")
-			.connect("synapse_1","synapse_2")
-			//.set_feedback_link("synapse_2","input_1")
+			.add_component("Component",{},"comp_1")
+			.add_component("Component",{},"comp_2")
+			.connect("input_1","comp_1","feedforward",true)
+			.connect("comp_1","comp_2","feedforward",true)
 		}
 
 		expect(func).not.toThrow();
@@ -32,7 +31,7 @@ describe("System",function(){
 	it("Synapse Network, competition for reconnection",function(){
 		
 		let world_spec={
-			max_inputs:2,
+			slots_input:2,
 			count_outputs:2,
 			period:5
 		};
@@ -50,7 +49,7 @@ describe("System",function(){
 			init_state:{
 				limit_reconnections:1,
 			},
-			max_inputs:2,
+			slots_input:2,
 			count_outputs:2,
 			components:{
 				"Synapse":synapse_spec
