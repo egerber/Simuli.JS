@@ -107,12 +107,12 @@ let neuron_schema={
 	compute_output:function(inputs,state){
 		state.last_inputs=inputs;
 
-    	let sum=0;
-    	for(let i=0;i<state.weights.length;i++){
+		let sum=0;
+		for(let i=0;i<state.weights.length;i++){
     		sum+=inputs[i]*weights[i];
     	}
 
-    	return sum;
+		return sum;
    	},
     compute_feedback(output,state){
     	return; //component is not sending feedback
@@ -256,8 +256,7 @@ let system_schema={
 		let neurons=state.members.add("neuron", 20, ["neurons"]);
        
         ... //connecting inputs with synapses, synapses with neurons
-	}
-
+	},
 	events:[
 		{
 			interval:50,
