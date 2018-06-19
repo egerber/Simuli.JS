@@ -109,16 +109,16 @@ let neuron_schema={
 
 		let sum=0;
 		for(let i=0;i<state.weights.length;i++){
-    		sum+=inputs[i]*weights[i];
+			sum+=inputs[i]*weights[i];
 		}
 
 		return sum;
 	},
-    compute_feedback(output,state){
-    	return; //component is not sending feedback
-    },
-    apply_feedback(output,state,feedback){
-    	state.sum_error+=feedback-output;
+	compute_feedback(output,state){
+		return; //component is not sending feedback
+	},
+	apply_feedback(output,state,feedback){
+		state.sum_error+=feedback-output;
 
 		for(let i=0;i<state.weights.length;i++){
 			if(feedback-output>0)
@@ -127,15 +127,15 @@ let neuron_schema={
 				state.weights[i]-=state.delta_update;
 		}
 	},
-    events:[
-    	{
-    		condition:(state)=>state.sum_error>10, 
-    		action:function(state){
-    			state.weights=Array.from({length:5}, (el)=>Math.random()) //initialize new weights
-    			state.sum_error=0; //reset error
-    		}
-    	}
-    ]
+	events:[
+		{
+			condition:(state)=>state.sum_error>10, 
+			action:function(state){
+				state.weights=Array.from({length:5}, (el)=>Math.random()) //initialize new weights
+				state.sum_error=0; //reset error
+			}
+		}
+	]
 }
 ```
 Description: The schema models the behavior of an artificial neuron which integrates feedforward signals by multiplying them with their respective weight. The output forms some kind of prediction. If the feedback value to the neuron is higher than this prediction, all weights are incremented, otherwise decremented. This way the prediction should become better overtime. 
@@ -277,8 +277,8 @@ let system_schema={
 				}
 			}
 		},
-    	{
-    		interval:100,
+		{
+			interval:100,
 			action:function(state){
 				let synapses=state.members.select("synapses");
 
@@ -286,7 +286,7 @@ let system_schema={
 					synapses.min((state)=>score).remove();
 				}
 			}
-    	}
+		}
 	]
 }
 ```
