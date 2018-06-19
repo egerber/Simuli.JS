@@ -154,12 +154,12 @@ A system has a `state` like a normal component but can also access all included 
 ```javascript
 let system_schema={
 	init_state:{
-    	max_number_components:10
-    },
+		max_number_components:10
+	},
 	init: function(state){
-    	let k=state.max_number_components;
-    	state.members.add("my_component",k,["my_group0","my_group1"]);
-    }
+		let k=state.max_number_components;
+		state.members.add("my_component",k,["my_group0","my_group1"]);
+	}
 }
 ```
 Description: The schema adds `10` components of the type `"my_component"` (must be defined earlier in session) and adds it to the groups `my_group0` and `my_group1`
