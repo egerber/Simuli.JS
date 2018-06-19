@@ -329,13 +329,13 @@ let system_schema:{
 
 let session=new Session("neural_network")
 	.schema("input", input_schema)
-    .schema("synapse",synapse_schema)
-    .schema("neuron",neuron_schema)
-    .system(system_schema)
-    .state_monitor(["neurons","synapses"],["score"],1)
-    .activation_monitor(["inputs", "neurons", "synapses"], "feedforward",1)
-    .activation_monitor(["neurons"], "feedback", 1)
-    .run(1000)
+	.schema("synapse",synapse_schema)
+	.schema("neuron",neuron_schema)
+	.system(system_schema)
+	.state_monitor(["neurons","synapses"],["score"],1)
+	.activation_monitor(["inputs", "neurons", "synapses"], "feedforward",1)
+	.activation_monitor(["neurons"], "feedback", 1)
+	.run(1000)
 }
 
 let data=session.data;
