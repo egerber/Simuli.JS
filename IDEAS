@@ -356,3 +356,81 @@ ConnectionManager
 No need for System component()
 Instead: allow how to set inputs in network component
 - 
+
+----------------
+
+s1.connect(s2)
+- specify port reset
+- specify type
+	- connect_feedforward(s2)
+	- connect_feedback(s2)
+	- connect_bidirectional(3)
+- specify mapping
+	- (i,j)=>true
+	- probabilistic
+	- probabilistic based on state
+
+	- (state1,state2)=>state1.x - state2.y + Math.random()
+	-> every target should be hit exactly once from random source 
+		-
+	-> how to specify connection to a port
+		- 
+		elemenent1.connect()
+
+		{	
+			target:
+			type:
+			mapping:
+			reset
+			method: append_until full/override_when_full
+		}
+
+how to unset connections?
+	- selection.unconnect(type,(state1, state2)=>true)
+	- selection.unconnect(selection2, type) //remove all connections from 
+Ports should be able to be targeted explicitly
+- 
+
+Ports are in some way another layer of abstraction: Ports -> component -> group
+
+want something like
+
+element1.connect_to(element2, port=1)
+and 
+
+selection1.connect(selection2, feedforward, (i,j)=>true, reset_existing_connections)
+component1.connect(component2, feeforward, port)
+
+selection1.unconnect(type, (state1,state2)=>true)
+selection1.unconnect(selection2, type,)
+
+----------------
+
+ConnectionLogger
+- tracks the nodes and connectivity of all elements in the system
+
+ActivationLogger
+- tracks feedback states  and output states
+
+StateLogger
+- tracks state variables overtime
+
+EventLogger
+- logs the occurence of special events in the component
+-> later
+
+
+
+All Logging is done according to a selector
+
+e.g. 
+
+.monitor_state(select("group0"), ["my_var1", "my_var2"],interval);
+.monitor_state(select("group1"), ["my_var2", "my_var3"],interval);
+
+.monitor_activation(selectAll(), "feedforward",interval);
+.monitor_structure()
+
+selector for monitor should have following options:
+- select by schema -> e.g ["integrators"]
+- seĺect by group e.g. ["my_group_1"]

@@ -1,2 +1,0 @@
-delete_pool removes a pool from a model, however the reference to this pool from other units remain
-

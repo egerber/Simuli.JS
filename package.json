@@ -1,14 +1,14 @@
 {
-  "name": "binary-network",
+  "name": "simuli.js",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "start": "webpack --watch",
     "build": "webpack"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Emanuel Johannes Gerber",
+  "license": "MIT",
   "main": "build/index.js",
   "dependencies": {
     "lodash": "^4.17.4",

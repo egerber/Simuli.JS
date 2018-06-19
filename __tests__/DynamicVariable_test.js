@@ -1,7 +1,7 @@
-import SlidingAverage from '../src/app/DynamicVariables/SlidingAverage';
-import Custom from '../src/app/DynamicVariables/Custom';
-import RandomUniform from '../src/app/DynamicVariables/RandomUniform';
-import DynamicVariable from '../src/app/DynamicVariables/DynamicVariable';
+import SlidingAverage from '../src/DynamicVariables/SlidingAverage';
+import Custom from '../src/DynamicVariables/Custom';
+import RandomUniform from '../src/DynamicVariables/RandomUniform';
+import DynamicVariable from '../src/DynamicVariables/DynamicVariable';
 
 describe("DynamicVariable", function(){
 

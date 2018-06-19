@@ -1,347 +1,350 @@
-# Discrete Dynamic Systems Framework
+# Simuli.JS
 
-Dynamic System is a framework for simulating highly dynamic systems which include many interdependent components. The framework allows to define the detailed behavior of each component as well as the links through they are connected and interact with each other. When the system is simulated, all components and custom events in the system can be tracked and logged for analysis.
+Simuli.JS is an open source framework for modeling and simulating systems in discrete time. It designed to build and simulate complex interactive systems while monitoring the internal flow of information and internal system states. The framework provides easy constructs to define the behavior of individual components as well as the rules by which they are connected and reconnected. This makes the framework ideal for studying principles of learning and self organization.
+
 
 ### Features
-- defining components with specific behavior
-- defining systems and simulation of interacting components
-- tracking states/events of system components
-- logging the flow of information inside of a system
-- dynamic reconnection of components
-- dynamic creation of new components at runtime
+- generic constructs to define components with flexible behavior
+- simulating systems with interacting components
+- dynamic population change 
+- dynamic change of connectivity
+- logging statistics over information flow and system states
 
-### Motivation
-The framework was designed to study principles of emergence, self-organization and learning such as neuronal activity in spiking neural networks or the simulation of artifical ant colonies.
-The framework aims at simplyfying the process of implementing various types of networks by providing a generic schema for the definition of the behavior of a single component. One paradigm of this framework is to separate the definition of behavior from the parameters through which the behavior is modulated.
+## Installation and Use
+`npm install simulijs`
+
+import in javascript via
+```javascript
+import {Session} from 'simulijs';
+
+let session=new Session("my_new_session")
+...
+```
 
 ## Introduction
-A system consists of various components which interact which each other by exchanging information between each other. Since the framework is "Discrete", all behavior is defined on the basis of given time steps. The framework synchronizes all components by invoking the method `tick()` in each of them, which notifies the next timestep and triggers corresonding behavior.
+A system is a collection of components which interact with each other and create a synergistic whole. This framework differentiates two different types in which components can connect 
+
+Components within a system can interact with each other by sending and receiving signals. There are two different types of connections that can exist between components
+- **feedforward connections** 
+	- at every discrete timestep, a component receives feddforward signals from all of its connected (input) components. The component then processes the information and computes a value which is propagated to all (output) components connecting to it
+- **feedback connections** 
+	- at every discrete timestep, a component receives feedback signals from all of its connected (input) components. The component itself can compute a feedback value which is propagated to all (output) components connecting to it
+
+Connections can be either **undelayed** (the output value is propagated at the same timestep at which it is computed) or **delayed** (the output values is propagated at the next discrete timestep). 
 
 
-A system contains components as building block
-A componet is a basic element that is able to receive signals, process signals and send signals. A system is the composition of various (different) components that interact with each other to form a integrative whole. The framework provides a simple schema to define the behavior of a component and makes it possible to easily link components together. All interaction occurs at discrete timesteps. At any given point, all components send out and receive signals.
-There are two types of signals that can be sent among components: feedforward signals, and feedback signals. The combination of these two types of signals allow to model all kinds of interactive systems. At any timestep, feedfoward signals are sent between components. Once all feedforward signals were sent out, feedback signals are propagated through the network. This allows for feedback loops and all kinds of learning 
+All feedforward signals are propagated before the feedback signals. 
+
+### ----
+
+
+Consequently, each system is defined by
+1. the behavior of each component participating in the system
+2. the rules by which components are added and removed from and the the system
+2. the rules by which components are connected and reconnected with each other
+
+In combination, these mechanisms allow to define very complex behavior
 
 ### Component
-Components are the key elements of the framework. The class `Component` is the base class for all members in a system. 
-A component is a basic unit which receives input information at its input ports and computes an output value which is provided at it's output port. Other components can again receive input from the previous component and give output to yet another component. Besides this feed-forward flow of information, each component can send feedback-information to it's input components. That way, a network of interacting components can be defined. All exchange of information occurs at discrete timesteps.
-The behavior of a component, which includes how the information is processed and how the components reacts to special events can be customized according to a fixed **schema**. In general, all information about the component is stored as a `state` object inside the component and all behavior is defined by accessing and adapting the state parameters. The schema of a component includes the following properties:
-- **`max_inputs`** (default 1)
-	* specifies from how many components at the same time can the component receive input information at every timestep 
-- **`count_outputs`** (default 1)
-	* the dimensionality of the output that the component generates and which is sent to other components
-- **`init_state`** (default {})
-	* the initial state object of the component (By default the state contains the current timestep)
-- **`events`** (default [])
-	* allows to define custom behavior (refer to Section Events)
-In addition to these static attributes the schema of a component defines the feed-forward flow and feed-back flow of information through the component.
-#### feed-forward information flow
-- **`compute_output(inputs,state)`**
-	* This essential method returns the output value of the component with regard to the current input values (outputs from input components) and the current state object. If `max_inputs=1`, inputs holds the single input value given. if `max_inputs>1`, inputs is an array which references the input value from all input components
-
-#### feedback information flow
-In addition to information that flows through the network by feeding the output value from one component into the input of another component, information can flow from the recipient to the sender as well. This direction of flow is essential for all types of feedback processes. The feedback behavior of a component can be specified through the following methods:
-- **`compute_feedback(input_value,output_value,state,feedback_given)`**
-	* The method calcualtes and returns the feedback value that is sent to each individual component. The method is called for each individual component at any timestep and for every received feedback signal. The feedback can be computed with regard to the `input_value` of the selected input component as well as the current output signal. Furthermore the current `state` can be referenced as well as `feedback_given`, which is the received feedback value.
-- **`apply_feedack(output,this.state,feedback)`**
-	* Apply_feedback allows to respond to feedback information given by another component. It is called for every single feedback value that the component has received. `feedback` holds the signal from the sender. The parameter `Output` indicates the current output value of the component, while `state` provides the reference for the current state in order to write updates to the current state of the component.
-
-Additionally, specific events are triggered based on connection changes to the component
-- **`on_input_deleted(index,state)`**
-	* the method is called when the input from which the component received information (at the specified `index`) is removed
-- **`on_input_changed(index, new_input,state)`**
-	* this method is called whenever an input at one port was replaced by a new one.
-
-In order to synchronize all members s of the system, the framework internally invokes `tick()` in each component and on all dynamic variables. `tick()` notifies a new timestep and triggers event checks as well as feedback calls in components. Tick is a clocking method that should not be called explicitly
-
-#### Events
-Each component can be equipped with an array of custom events. Each event triggers some sort of update to the component if a specified condition applies. An event is defined by means of the following properties
-- **`name`** (default: "event_")
-	* name of the event (should be defined if the event should be logged)
-- **`init`** (default function(){}) 
-	* constructor function for initializing properties to the event to be reused inside the action method.
-- **`condition`** (default: function(state){return true})
-	* this function is invoked with the state object of the component. This method evaluates, whether or not the event gets triggered and returns true or false correspondingly.
-- **`action`** (default function(component){})
-	* function that is called when the event is triggered. The function gets invoked with the reference to the component
-- **`interval`** (default 1)
- 	* specifies the frequency of how often the event condition is checked. Ideally for defining method calls after a certain number of timesteps
-
-
-##### Example Schema
+A component is the building block of a system. Each component defines the way, how it processes input information (feedforward signals) and feedback information (feedback signals). All behavior is defined in relation to the state of the component, which can be freely defined and any modified. Furthermore a component can define a discrete set of events, which can trigger special actions under given conditions.
+The behavior of a component is implemented in a "schema". It has the following structure:
 ```javascript
-let event=new Event({
-	name: "my_specific_event",
-	init:function(){
-		this.reset_score=10;
-	}
+{
+	init_state:{},
+	compute_output,	//invoked with arguments (inputs,state)
+	compute_feedback, //invoked with arguments (output,state)
+	apply_feedback, //invoked with arguments (output,state,feedback)
+	events:[]
+}
+```
+
+- **`init_state`**
+	- defines all properties of the state of a component. By default, the state a component includes the field `timestep`, which references the current discrete time step, starting at `0`.
+- **`compute_output`**
+	- invoked with the arguments `(inputs,state)`
+	- returns the output value (feedforward) to be sent to connected components, given the array `inputs` of received feedforward signals. The output of the component can be computed in relation to the current `state`.
+- **`compute_feedback`**
+	- invoked with the arguments `(current_output, state)`
+	- returns the feedback signal that is sent to connected components. The feedback is computed with regard to the current output of the component, as computed by `compute_output` as well as the current `state`. This allows to broadcast feedback information to other components
+- **`apply_feedback`**
+	- invoked with the arguments `(output,state,feedback)`
+	- allows to define state updates with regard to it's own output and the `feedback_value` that was received. This method is invoked for any feedback signal received from a connected component.
+- **`events`**
+	- holds an array of objects of the type `Event` (see below)
+
+#### Event
+An event is defined by means of the following properties
+- **`condition`** (default: `function(state){return true}`)
+	* this function is invoked with the state object of the component. This method evaluates, whether or not the event gets triggered and returns true or false correspondingly.
+- **`interval`** (default `1`)
+ 	* specifies the frequency of how often the event condition is checked or if no condition is defined, how often the event should be triggered. This property is helpful for defining regular state updates after every number of time steps
+- **`action`** (default `function(state){}`)
+	* this function is invoked when the event is triggered. The function gets invoked with the reference to the state and allows to call updates to the state of the component
+
+##### Example Event
+```javascript
+let event={
 	condition:function(state){ 
-		retrun state.score>100
+		return state.score>100
 	},
 	action:function(component){
-		component.state.score=this.reset_score;
+		component.state.score=0,
 	},
 	interval:10
 });
 ```
-**Description**:
-In this example, an event of the name "my_specific_event" is defined, which initiales a value reset_score=10 . The event condition is checked every 10 timesteps and triggers when the component score is greater than 100. In this case the method action sets the score to the predefined reset_score value. 
-
-##### Example Schema
-```javascript
-let my_spec={
-	count_inputs:3,
-    count_outputs:1,
-    init_state:{
-    	accumulated_input:0
-    },
-    events:[
-    	new Event({
-        	condition: (state)=>state.accumulated_input>100
-            action: (component)=>component.state.accumulated_input=0
-        })
-    ],
-    compute_output: function(inputs,state){
-    	for(let input of inputs){
-        	state.accumulated_input+=input
-        }
-        
-        return state.accumulated_input;
-    },
-    compute_feedback:function(input_value,output_value,state,feedback_given){
-    	s
-    },
-    apply_feedback:function(output,state,feedback){
-    
-    },
-    on_input_deleted: function(index,state){
-    	state.accumulated_input=0;
-    }
-    on_input_changed:null
-}
-
-let my_component=new Component(my_spec);
-```
-**Description**:
-T
-
-### Network
-A network is the extension of a normal component. It can be defined in the same fashion than a normal component but allows the following features:
--components:{}
-
-- **groups**
-	* Every network is a collection of a number of sub-components which are organized into groups. New groups of sub-components can be created and exsiting ones modified. (?) A component can be part in multiple groups at the same time. The use of groups is to organize sub-networks as well as to describe connections between distinct groups. By default every network component comes with two groups: "Input", and "Output". The group "Input" contains input_components in the number of the specified max_inputs, and "Output" contains Output-components in the specified number of count_output. The "Input" group is where the individual input values to the network can be accessed while "Output" set the output values from the network. 
-
-- **`create(component_type, quantity, groups, args)`**
-	* create instantiates new components and adds them into the indicated groups. component_type can refer to a pre-defined component or a locally defined component in the components_specification of the network. The network searches for the schema of that component and generates new instances in the given quantity. args (default {}) allows to override the global or local component specification (e.g. change the init_state, etc.)
-
-- **`select(group,quantity,filter_func,selector)`**
-	* helper function for selecting sub components according to certain criteria. The selection is made by reference to a group (type string). All members of the group are filtered through the custom filter function (default: (component)=>true). Afterwards the method returns the selection among the resulting members and selected by the specified selector (default: Selector.Random) and the quantity given. If quantity is -1, all resulting items after the filtering are returned regardless of the selector. The method is very useful for finding the weakest or strongest components within a group, in order to perform special operations on them (e.g. deleting, reconnecting, reinforcing, etc.)
-
-- **`delete(component)`**
-	* delete a component from the network and all of its references inside the network. Triggers on_input_deleted in all components that referenced the component as an input.
-
-- **`init (default: function(model){})`**
-	* initizialization function of the network which is evaluated before the connections between the network groups are established. The method is useful to equip the network with sub-components initially before any connectivity is applied between them.
-
-#### Example
-```javascript
-let network=new Network({
-	count_inputs:5,
-    count_outputs:5
-    })
- ```
-
-**Description**:
-TODO
-
-### System
-The system object lets you define the building blocks of your system. 
-
-- **`add_component(component_type, args, name)`**
-	 * adds a new component to the system. The argument "args" accepts the arguments (or specification) for the specified type of component. "name" allows you to reference the create component later in order to define connections between components.
-
-- **`connect(connection_obj)`**
-	* Establishes a connection between two components. The specific components from the system can be addressed by their names using the src, and target field (see section Connections). Note, that the order in which the components are appended to the system dictate the order in which information flows up and down the system. Components that are added to the system first, are the first to forward an output signal and the last to receive a feedback_signal.
-
-#### Example
-```javascript
-let system=new System()
-	.add_component("Input","input1")
-    .add_component("Synapse","synapse1")
-    .add_component("Output", "output1")
-    .connect("input1","synapse1")
-    .connect("synapse1","output1");
-```
-
-**Description** :
-TODO
-
-
-### Session
-A session is the instance for running and logging a system simulation. It also keeps track of all component instances internally. A session object must be created prior to any creation of components or a system. 
-
-Initialization:
-Session initially only takes one argument "name" which is optional. 
-let my_session=new Session("my_session");
-
-- **`set_system(system)`**
-	* sets the system reference for the session.
-- **`set_monitor(monitor)`**
-	* sets the monitor for logging the internal behavior in the system
-- **`add_monitor(monitor_obj)`**
-	- While the system is simulated, the activation inside the whole network can be closesly monitored using a Monitor (see Monitor paragraph below)
-- **`run(iterations)`** 
-	- runs (and logs) a system simulation for the specified number of iterations. Consecutive calls of run() will start at the context of the previous context. 
-
-#### Monitor
-a monitor is the collection of loggers for a session. Different types of activation and behavior can be tracked using different loggers. Currently the following loggers are supported:
-- **`StateLogger(component_type, state_properties, interval)`**
-	- logs the specified `state_properties` of the named `component_type` after each number of timesteps (determined by `interval`)
-- **`EventLogger(component_type, events)`**
-	- allows to log the occurrene of events inside components. The type of events that are logged are specified by `event_names`, which is an array of strings, refering to defined events inside a component_type.
-- **`ActivationLogger(component_types)`**
-	- logs the output values of all specified component_types while the simulation is running
-
-#### Example
-A session method can be created with method chaining.
-```javascript
-let session=new Session("session_1")
-	.set_system(new System()
-		.add_component("Input",{},"input1")
-		.add_component("Synapse",{},"synapse1")
-		.set_input_link("input1","synapse1")
-	)
-	.set_monitor(new Monitor()
-		.add(new StateLogger("Synapse",["score", "count_0_0"],100))
-		.add(new ActivationLogger("Synapse")
-	)
-	.run(1000)
-```
-
-***Description***:
-TODO 
-
-### Connections
-Connections are objects for defining a link between two components or two groups. It is constructed by means of an object with the following fields:
-- **`src`**
-	* indicates the name of the sending component/group
-- **`target`**
-	* indicates the name of the receiving component/group
-- **`mapper`**
-	* specifies the method by which two arrays of components are mapped to each other
-- **`type`**
-	* since one component can have multiple inputs, type specifies how the new connections and old connections between components interfer.
-	* **"Append"**: All existing input connections to the target component are kept. If input slots are available, new connections are appended to the component.
-	* **"Reset"** (default): All existing input connections to the target component are removed before new connections are appended.
-
-#### Mappers
-Mappers are functions that take two arrays (src_array, target_array) and return a mapping between src items and target items in the fashion `[ [src[i1],target[j1], [src[i2],target[j2]], ...]`. When used in connection objects, they allow to define how components from two groups should be connected with each other.
-Currently, the following types of mappers are provided:
-##### Random
-* connects every target item with a random src item
-##### Linear
-* connects the kth src item with the kth src item
-##### Fully
-* connects every single item from the src with every single item from target
-
-
-#### Example
-```javascript
-let connection=new Connection({
-	src:"Input",
-    target:"Synapse",
-    mapper: Mapper.Full,
-    type: "Reset"
-})
-```
-
-**Description**:
-When applied, this object will add input connections to each component of the "Synapse" group with every component from the "Input" group. Previous connections for all target components will be resetted before. 
-
-
-### Selectors
-
-A selector is a function that takes the arguments `(arr, k)` and returns a sub selection of k items from the array based on the type of selector.The following types of selector functions can be generated: 
-
-- **`Linear()`**
-	- returns the k first items from the array
-- **`Random()`**
-	- returns a random sample of k items from the array in random order
-- **`Min(iteratee)`**
-	- `iteratee` is a function which is invoked for each item of the array and must return a numeric value, which defines the criterion by which the array is ordered. The selector returns the k smallest item with respect to the specified criterion
-- **`Max(iteratee)`**
-	- analog to Min(iteratee) but returns the k biggest items instead
-
-#### Example
-```javascript
-let selector=Selectors.Min( (obj)=>obj.x);
-
-let selection=selector([{x:10},{x:-5},{x:20}], 2) // returns [{x:-5},{x:10}]
-```
-**Description**: the selector returns the the two objects with the smallest value for `x`
-
-### Competition
-TODO
-
-### Dynamic Variables
-Dynamic Variables (of the type `DynamicVariable`)can be used in order to add dynamic behavior to individual state parameters of a component. DynamicVariables can be accessed, that is read and modified, in the exactly same fashion as a numeric value when it is part of the state object in a component. Outside of the state object, the value of an instance from `DynamicVariable` can be accessed and modified via the `value` attribute. 
-
-Every class that inherits from `DynamicVariable` should override `get value(){}` and `set value(new_value){}`. If needed, the method `tick()` can be overriden in order to perform time dependent changes to the value.
-
-Currently, the following types of DynamicVariables exist:
-
-- **`SlidingAverage(init_value,interval)`**
-	- variables of the type `SlidingAverage` always return the average of the values it was assigned over the past timesteps (specified by `interval`). For example, if the variable previously was assigned the values `10, 1, 4, 5, 2, 3` and the interval is set to `5`, the variable will output the value of `3`
-
-- **`RandomUniform(init_value, min, max, floating=false)`**
-	- the variable of this type will generate a new random value between `min` and `max` at every timestep, regardless of the value that was assigned to it. If `floating` is true, the value is a floating point number, otherwise a discrete integer.
-
-- **`Custom(init_value=_.random(0,1),func=function(value,t){return 0}`**
-	- a variable of this type can be modified by defining `func` which takes as arguments the current value of the variable and the current timestep. The output value of this variable will be the return value of `func`. The values assigned to this variable are ignored.
-
-#### Example
-**Creating a new DynamicVariable**
+Description: checks every `10` timesteps if the score of the component is greater than `100`. If this is true, the score is set back to `0`. 
+#### Example Schema
 
 ```javascript
-class MyFuzzyVariable inherits DynamicVariable{
-	constructor(init_value){
-		this._value=init_value;
-	}
-
-	get value(){
-		return this._value;
-	}
-
-	set value(new_value){
-		this._value=new_value+Math.random(0,1);
-	}
-}
-```
-**Description**: Every time a new value is assigned to the variable, a random offset between `0` and `1` is added. The variable will output this value every time it's value is accessed. This could be useful in order to test the robustness of a parameter value.
-
-**Using a DynamicVariable inside a component**
-```javascript
-let component=new Component({
+let neuron_schema={
 	init_state:{
-		difference: new DynamicVariable.SlidingAverage(0, 10) //(init_value, interval)
+		weights:Array.from({length:5}, (el)=>Math.random()),
+		delta_update: 0.1,
+		sum_error:0,
+		last_inputs:[]
 	},
-	compute_output(input,state){
-		return input+state.difference;
-	},
-	apply_feedback(output,state,feedback){ 
-		state.difference=feedback-output;
-	}
-	...
-});
-```
-**Description**: The score variable is incremented everytime, the output of the component and it's received feedback match. When the score variable is accessed, it returns the averaged value over the previous 10 timesteps. This makes the score value less prone to short term fluctiations and smoothens. 
+	compute_output:function(inputs,state){
+		state.last_inputs=inputs;
 
-----
-## Examples
-[Spiking Neural Network](./samples/SpikingNeuralNetwork.js)
+    	let sum=0;
+    	for(let i=0;i<state.weights.length;i++){
+    		sum+=inputs[i]*weights[i];
+    	}
+
+    	return sum;
+   	},
+    compute_feedback(output,state){
+    	return; //component is not sending feedback
+    },
+    apply_feedback(output,state,feedback){
+    	state.sum_error+=feedback-output;
+
+		for(let i=0;i<state.weights.length;i++){
+			if(feedback-output>0)
+				state.weights[i]+=state.delta_update;
+			else
+				state.weights[i]-=state.delta_update;
+		}
+	},
+    events:[
+    	{
+    		condition:(state)=>state.sum_error>10, 
+    		action:function(state){
+    			state.weights=Array.from({length:5}, (el)=>Math.random()) //initialize new weights
+    			state.sum_error=0; //reset error
+    		}
+    	}
+    ]
+}
+```
+Description: The schema models the behavior of an artificial neuron which integrates feedforward signals by multiplying them with their respective weight. The output forms some kind of prediction. If the feedback value to the neuron is higher than this prediction, all weights are incremented, otherwise decremented. This way the prediction should become better overtime. 
+
+If the sum of the deviation between the predicted value and the feedback value exceeds 10., the neuron resets all weights.
+### System 
+A system is the parent of all existing components. It is defined in the same way as a `Component`, but also has an additional property `init` (invoked with `(state)`) which is called upon the creation of the system.
+A system has a `state` like a normal component but can also access all included components via `state.members`. This property is of the type `GroupContainer` and has two methods
+- **`add(component_type, quantity=1, groups=null, args={})`**
+	- allows to add new components to the system. `component_type` refers to the name of the component that was define in the session via `schema(name,schema)` (see paragraph `Session`). `quantity` specifies the number of components to be created. `groups` can take one string or an array of strings and specifies the groups in which the new components should be part of. `args` allows to modify or override selected properties of the component_schema to which is referred by `component_type`. The method returns an object `ComponentSelection` with all created components.
+- **`select(groups)`**
+	- takes a single string or an array of strings of all groups to be selected. Returns a `ComponentSelection` with all members of the specified groups.
+- **`selectAll()`**
+	- returns a `ComponentSelection` with all components of the system
+
+```javascript
+let system_schema={
+	init_state:{
+    	max_number_components:10
+    },
+	init: function(state){
+    	let k=state.max_number_components;
+    	state.members.add("my_component",k,["my_group0","my_group1"]);
+    }
+}
+```
+Description: The schema adds `10` components of the type `"my_component"` (must be defined earlier in session) and adds it to the groups `my_group0` and `my_group1`
+
+####  ComponentSelection
+An instance of `ComponentSelection` bundles one or several components and allows to perform collective action. The following methods are supported:
+ - **`apply(func)`**
+ 	- invokes the method `func` on all selected components. `func` is invoked with the `state` of each component.
+ 	- e.g. `selection.apply( (state)=>state.score++)` (increments the property score of all selected components)
+ - **`filter(criterion)`**
+ 	- returns a filtered sub selection (type `ComponentSelection`) with respect to the given `criterion`. `criterion` is invoked with the state of each component and must return `true` or `false` for whether the component is to be filtered
+ 	- e.g. `selection.filter((state)=>state.score>10))` (returns a sub selection of all components with a score greater than `10`)
+- **`sample(k=1)`**
+	 - returns a sub selection of `k` randomly selected components.
+ 	- e.g. `selection.sample(10)` (returns a sub selection of `10` random elements from the current selection)
+- **`max(iteratee, k)`**
+ 	- returns a ranked sub selection of `k` elements according to a criterion `iteratee` with descending order. `iteratee` is invoked with the `state` of each component and must return the value by which the components are ranked.
+ 	- e.g. `selection.max((state)=>state.score,5)` (returns a sub selection of the 5 components with the highest score)
+ - **`min(iteratee, k)`**
+ 	- same as `max` but ranked ascending
+ - **`union(selection)`**
+	 - takes as argument another instance of `ComponentSelection` and returns a selection with all unique components of the two selections
+ - **`remove()`**
+ 	- removes all selected components from the system as well as all connections from them or to them
+ - **`length`**
+ 	- the number of selected components
+ - **`elements`**
+ 	- returns an array of sub selections for each component
+ 	- e.g. `selection.elements[0]` (refers to a selection object with the first selected component)
+ - **`connect({target, mapping, type, delayed, callback_connected})`**
+ 	- connects the elements of the current selection with the specified `target` selection
+ 	- returns an instance `ConnectionSelection` with all newly established connections 
+ 	- **`target`**: 
+ 		- specifies the target selection to be connected with
+ 	- **`mapping`** (default `(i,j)=>true`):
+ 		- invoked with `(i,j,state_source,state_target)` for all pairs between the components from the source selection the components from the target selection. `i` refers to the index of the source components inside the selection (e.g. `0` for the first, `1` for the second element, etc.), and `j` to the index of the target component. Similarly `state_source` and `state_target` reference the `state` of the the respective components. If the method returns `true`, the two components are connected with each other. 
+ 	- **`type`** (default `feedforward`): 
+ 		- Determines the type of connection that is established between the components. 
+	 		-  `"feedforward"`: indicates that the components of the source selection send feedforward signals to the components of the target selection
+	 		- `"feedback"` indicates that feedback signals are to be sent from source to target. 
+	 		- `"bidirectional"` establishes a feedforward connection from source to target, and a feedback connection from target to source. This is helpful, whenever a component should receive feedback to the component to which it propagates feedforward signals.
+ 	- **`delayed`** (default:`false`)
+ 		- `true`: the source component sends a feedforward or feedback signal at the same timestep at which it is computed. When this option is used, it should be made sure, that no cyclic connection between the source and target component exist, otherwise the signal values cannot be resolved.
+		- `false`: the source component sends a feedforward or feedback signal at the next timestep after it was computed. This option prevents any problems from cyclic connections.
+	- **`callback_connected`** (default `()=>null`)
+		- is invoked with `(state_source, state_target)` of all pairs that are to be connected (all pairs for which mapping returned `true`)
+
+#####  Example Connection
+```javascript
+	selection_source.connect({
+        target: selection_target,
+        type: "feedforward",
+        mapping: (i,j,state_source,state_target)=>state_source.score>state_target.score,
+        delayed: true,
+        callback_connected: (state_source, state_target)=>state_target.count_input_connections++
+	})
+```
+Description: connects all pairs of components from the source selection and target selection where the source component has a smaller score than the target component. For every established connection between the source and the target selection, the target component increments `count_input_connections`
+	
+
+#### ConnectionSelection
+An instance of `ConnectionSelection` bundles one or several connections between components and allows to perform collective action on them. The following methods are supported:
+- **`apply(func)`**
+	- invokes the method `func` on the selected connections. `func` is invoked with the `(state_source,state_target`) of each connection.
+ 	- e.g. `selection.apply( (s1,s2)=>s1.score++)` (increments the property score of the source component of all selected connections)
+ - **`filter(criterion)`**
+ 	- returns a filtered sub selection (type `ConnectionSelection`) with respect to the given `criterion`. `criterion` is invoked with `(state_source,state_target`) of each connection and must return `true` or `false` for whether the connection is to be filtered
+	 - e.g. `selection.filter((s1,s2)=>s2.score>10))` (returns a sub selection of all connections with the target component's score greater than 10)
+ - **`sample(k=1)`**
+ 	- returns a random sub selection of `k` randomly selected connections.
+ 	- e.g. `selection.sample(10)` (returns a sub selection of 10 random elements from the current selection)
+ - **`max(iteratee, k=1)`**
+	 - returns a ranked sub selection of `k` elements according to a criterion `iteratee` with descending order. `iteratee` is invoked with the `(state_source,state_target`) of each connection and must return the value by which the connections are ranked.
+	 - e.g. `selection.max((s1,s2)=>s1.score+s2.score,5)` (returns a sub selection of the 5 connections with the highest sum of scores between the source and the target component)
+- **`min(iteratee, k=1)`**
+ 	- same as `max` but ranked ascending
+- **`union(selection)`**
+ 	- takes as argument another instance of `ConnectionSelection` and returns a selection with all unique connections of the two selections
+ - **`remove()`**
+ 	- deletes all selected connections
+ - **`length`**
+	 - the number of selected connections
+ **`elements`**
+ 	- returns an array of sub selections for each connection
+ 	- e.g. selection.elements[0] refers to a selection object with the first selected connection
+ 
+##### Example
+```javascript
+let system_schema={
+	init_state={},
+	init:function(state){
+    	let inputs=state.members.add("input",100,["inputs"]);
+     	let synapses=state.members.add("synapse",100, ["synapses"]);
+		let neurons=state.members.add("neuron", 20, ["neurons"]);
+       
+        ... //connecting inputs with synapses, synapses with neurons
+	}
+
+	events:[
+		{
+			interval:50,
+			action:function(state){
+            	let looser_synapses=state.members.select("synapses").filter((state)=>state.score<0);
+				let looser_neurons=state.members.select("neurons").min((state)=>state.score,looser_synapses.length);
+                
+                looser_synapses.output_connections("feedforward").remove();
+                looser_synapses.connect({
+                	target:looser_synapses,
+                    type:"bidirectional",
+                    mapping: (i,j)=>i==j,
+                    delayed: false
+                    callback_connect:function(state_synapse,state_neuron){
+                        state_synapse.score=0;
+                        state_neuron.score=0;
+                    }
+                }
+			}
+		},
+    	{
+    		interval:100,
+    		action:function(state){
+    			let synapses=state.members.select("synapses");
+
+    			if(synapses.length>=50){
+    				synapses.min((state)=>score).remove();
+    			}
+    		}
+    	}
+	]
+}
+```
+
+Description: When initialized, the system creates 20 neuron components and 100 synapse components. Every 50 timesteps, it selects all synapses with negative score and reconnects them with the neurons which have the lowest score. The score of the involved components is reset. Also, every 100 timesteps the weakest synapse is removed untill only 50 synapses exist.
+ 
+### Session
+In order to run a simulation, a session object must be initialized via `new Session(session_name=null)` (e.g. `let session=new Session("my_session")`). The object has the following methods:
+- **`schema(component_name,schema_def)`**
+	- `component_name` is of type string and defines the name for the component. `schema_def` holds the schema definition for the component. By linking a component definition to a name, the system can later reference this definition when adding new components.
+- **`system(system_def)`**
+	- initializes the system by passing the system schema. In order to access the component schemas, the system should be defined after all the components were defined.
+- **`state_monitor(selected_groups,selected_state_properties,interval=1)`**
+	- adds a `StateMonitor` to the session. A state monitor logs the state properties of system components at runtime. `selected_groups` can be a string or an array of strings, referencing one or multiple groups of the system to be monitored. `selected_state_properties` is an array of strings which indicate which properties of the components states should be logged. `interval` specifies the interval at which the values are logged.
+- **`activation_monitor(selected_groups,activation_type,interval=1)`**
+	- adds an `ActivationMonitor` to the session. An activation monitor logs the activation of systems components at runtime. `selected_groups` can be a string or an array of strings, referencing one or multiple groups of the system to be monitored. `activation_type` can be either `"feedforward"` or `"feedback"` in order to monitor the respective type of activation in the system. `interval` specifies the interval at which the values are logged.
+- **`data`**
+	- returns the data of all logs
+
+
+#### Example
+```javascript
+let input_schema={
+	init_state:{}
+   	...
+}
+
+let synapse_schema:{
+	...
+}
+
+let neuron_schema:{
+	...
+}
+
+let system_schema:{
+	...
+}
+    
+
+let session=new Session("neural_network")
+	.schema("input", input_schema)
+    .schema("synapse",synapse_schema)
+    .schema("neuron",neuron_schema)
+    .system(system_schema)
+    .state_monitor(["neurons","synapses"],["score"],1)
+    .activation_monitor(["inputs", "neurons", "synapses"], "feedforward",1)
+    .activation_monitor(["neurons"], "feedback", 1)
+    .run(1000)
+}
+
+let data=session.data;
+```
+Description: First, three different component types (neuron,synapse, and input) are defined. Afterwards the system schema is specified and three monitors are added. During the simulation, the state property `score` of all neurons and synapses is logged as well as the forward signals of all components and the feedback signals of all neurons. The simulation is executed for 1000 timesteps. Last, all logged values are retrieved.
 
 ## TODO
-- [ ] Optimization (model.create): Pool Method for Instantiation of new Components.
-- [ ] export and import of a session for reloading and continuing a system simulation
-
+- [ ] export/import functionality for session
+- [ ] Monitoring graph of the system
+- [ ] Dashboard for visualizing all monitored data
+- [ ] connecting components via arbitrary long delay lines

@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 21);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -17178,504 +17178,10 @@ module.exports =
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28), __webpack_require__(29)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22), __webpack_require__(23)(module)))
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Selector = __webpack_require__(5);
-
-var _Selector2 = _interopRequireDefault(_Selector);
-
-var _lodash = __webpack_require__(0);
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _DynamicVariable = __webpack_require__(2);
-
-var _DynamicVariable2 = _interopRequireDefault(_DynamicVariable);
-
-var _ComponentManager = __webpack_require__(3);
-
-var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Component = function () {
-	function Component() {
-		var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-		    _ref$count_outputs = _ref.count_outputs,
-		    count_outputs = _ref$count_outputs === undefined ? 1 : _ref$count_outputs,
-		    _ref$max_inputs = _ref.max_inputs,
-		    max_inputs = _ref$max_inputs === undefined ? 1 : _ref$max_inputs,
-		    _ref$init_state = _ref.init_state,
-		    init_state = _ref$init_state === undefined ? {} : _ref$init_state,
-		    _ref$events = _ref.events,
-		    events = _ref$events === undefined ? [] : _ref$events,
-		    _ref$compute_output = _ref.compute_output,
-		    compute_output = _ref$compute_output === undefined ? null : _ref$compute_output,
-		    _ref$compute_feedback = _ref.compute_feedback,
-		    compute_feedback = _ref$compute_feedback === undefined ? null : _ref$compute_feedback,
-		    _ref$apply_feedback = _ref.apply_feedback,
-		    apply_feedback = _ref$apply_feedback === undefined ? null : _ref$apply_feedback,
-		    _ref$on_input_deleted = _ref.on_input_deleted,
-		    on_input_deleted = _ref$on_input_deleted === undefined ? null : _ref$on_input_deleted,
-		    _ref$on_input_changed = _ref.on_input_changed,
-		    on_input_changed = _ref$on_input_changed === undefined ? null : _ref$on_input_changed;
-
-		_classCallCheck(this, Component);
-
-		this.id = Component.countInstances;
-		Component.countInstances++;
-
-		this.state = _extends({}, Component.default_init_state, init_state); //internal variables of the component
-		this.max_inputs = max_inputs;
-		this.count_outputs = count_outputs;
-
-		//array of components from which feedforward-signal is received
-		this._inputs = [];
-		//array of components to which feedback signal is sent
-		this._feedback_inputs = [];
-
-		//overrides behavioral methods of components if specified
-		if (compute_output != null) {
-			this.compute_output = compute_output;
-		}
-		if (compute_feedback != null) {
-			this.compute_feedback = compute_feedback;
-		}
-		if (apply_feedback != null) {
-			this.apply_feedback = apply_feedback;
-		}
-		if (on_input_deleted != null) {
-			this.on_input_deleted = on_input_deleted;
-		}
-		if (on_input_changed != null) {
-			this.on_input_changed = null;
-		}
-
-		//checks if the output getter is currently processed in order to prevent circular calls
-		this._output_is_evaluated = false;
-
-		this._timestep_cache = -1; //timestep of the last cached output
-		this._cached_output = null;
-		this.events = [].concat(_toConsumableArray(Component.default_events), _toConsumableArray(events)); //determines the behavior of the component given that conditions apply
-
-		this.connection_dirtybit = true; //for the StructureLogger: indicates whether a change in the input connection has occured, initially true in order to save first state
-	}
-
-	//this method is called for every time step of the parent component
-
-	//keeps track of how many components have been initialized
-	//prototype of all components in a model
-
-	_createClass(Component, [{
-		key: 'tick',
-		value: function tick() {
-
-			this._receive_feedback();
-
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
-
-			try {
-				for (var _iterator = _lodash2.default.values(this.state.__dynamic_properties)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var dyn_var = _step.value;
-
-					dyn_var.tick();
-				}
-
-				//check if any conditions apply
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
-					}
-				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
-				}
-			}
-
-			this._handle_events();
-
-			this.state.timestep++;
-		}
-
-		//perform state changes based on received feedback
-
-	}, {
-		key: 'apply_feedback',
-		value: function apply_feedback() {
-			var feedback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-			var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.state;
-			var output = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.output;
-		}
-
-		//is called if the _inputs is deleted
-
-	}, {
-		key: 'on_input_deleted',
-		value: function on_input_deleted(component_id) {
-			var index = _lodash2.default.findIndex(this._inputs, component_id);
-			this._inputs.splice(index, 1);
-			this.on_input_changed(index, null);
-		}
-
-		//is called when one input is changed
-
-	}, {
-		key: 'on_input_changed',
-		value: function on_input_changed(index, new_component) {}
-
-		//method for calulating the output value of the current timestep
-		//returns the computed value
-
-	}, {
-		key: 'compute_output',
-		value: function compute_output(inputs, state) {
-			return null;
-		}
-
-		//returns the feedback that is passed to the target component 
-
-	}, {
-		key: 'compute_feedback',
-		value: function compute_feedback(target_output) {
-			var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.state;
-			var output = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.output;
-
-			return null;
-		}
-	}, {
-		key: 'set_input',
-		value: function set_input(component) {
-			var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-			if (index > this.max_inputs) {
-				throw "Error: tried to set input for index ", index, " but only ", this.max_inputs, " inputs allowed";
-			}
-
-			this._inputs[index] = component.id;
-
-			//notify change of input at given index
-			this.on_input_changed(index, component);
-			//notify for structure logger that a connection was updated
-			this.connection_dirtybit = true;
-		}
-	}, {
-		key: 'add_feedback_input',
-		value: function add_feedback_input(component) {
-			this._feedback_inputs.push(component.id);
-		}
-
-		/*
-  adds a new input to the input port if a new port exists
-  */
-
-	}, {
-		key: 'add_input',
-		value: function add_input(input) {
-			if (this._inputs.length < this.max_inputs) {
-				this.set_input(input, this._inputs.length);
-			} else {
-				for (var i = 0; i < this._inputs.length; i++) {
-					if (this._inputs[i] == undefined) {
-						this.set_input(i, input);
-						return;
-					}
-				}
-
-				//else: no more input slots available, do nothing
-			}
-		}
-	}, {
-		key: 'hasInputs',
-		value: function hasInputs() {
-			return this._inputs.length > 0;
-		}
-
-		/*
-  @param feedback
-  */
-
-	}, {
-		key: '_receive_feedback',
-		value: function _receive_feedback(feedback) {
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
-
-			try {
-				for (var _iterator2 = this.feedback_inputs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var feedback_input = _step2.value;
-
-					this.apply_feedback(feedback_input.compute_feedback(this.output));
-				}
-			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
-					}
-				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
-					}
-				}
-			}
-		}
-
-		//marks the begin of the evaluation of the output in order to prevent circular calls
-
-	}, {
-		key: '_begin_output_evaluation',
-		value: function _begin_output_evaluation() {
-			this.output_is_evaluated = true;
-		}
-
-		//marks the end of the evaluation of the output in order to prevent circular calls
-
-	}, {
-		key: '_end_output_evaluation',
-		value: function _end_output_evaluation() {
-			this.output_is_evaluated = false;
-		}
-	}, {
-		key: '_set_cached_output',
-		value: function _set_cached_output(value) {
-			this.timestep_cache = this.state.timestep;
-			this.output_cached = value;
-		}
-
-		//checks if for the current timestep, a cached result exists (dynamic programming)
-
-	}, {
-		key: '_cached_output_exists',
-		value: function _cached_output_exists() {
-			if (this.state.timestep == this.timestep_cache) return true;else return false;
-		}
-
-		//iterates over component event and calls handler
-
-	}, {
-		key: '_handle_events',
-		value: function _handle_events() {
-			for (var i = 0; i < this._events.length; i++) {
-				if (this.state.timestep % this._events[i].interval == 0 && this._events[i].condition(this.state)) {
-					this._events[i].action(this);
-					this.event_trace[i] = true;
-				} else {
-					this.event_trace[i] = false;
-				}
-			}
-		}
-	}, {
-		key: 'feedback_outputs',
-		set: function set() {
-			var components = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-			this._feedback_outputs = components;
-		}
-
-		/*
-  technically redundant to set_input
-  sets the input references to the component
-  */
-
-	}, {
-		key: 'inputs',
-		set: function set() {
-			var inputs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-
-			//notify if previously defined input ports are un-set
-			var count_new_inputs = void 0;
-			var count_old_inputs = this._inputs.length;
-
-			if (Array.isArray(inputs)) {
-				count_new_inputs = inputs.length;
-			} else {
-				count_new_inputs = 1;
-			}
-
-			if (count_old_inputs < count_new_inputs) {
-				var count_deleted_indices = count_old_inputs - count_new_inputs;
-				for (var i = 0; i < count_deleted_indices; i++) {
-					this.on_input_changed(count_old_inputs - i - 1, null);
-				}
-			}
-
-			if (Array.isArray(inputs)) {
-				//input is array
-				for (var _i = 0; _i < inputs.length; _i++) {
-					this.set_input(inputs[_i], _i);
-				}
-			} else {
-				//single input
-				this.set_input(inputs, 0);
-			}
-		}
-
-		/*
-  returns an array of input references to the component
-  */
-		,
-		get: function get() {
-			return _ComponentManager2.default.get_ids(this._inputs);
-		}
-	}, {
-		key: 'feedback_inputs',
-		get: function get() {
-			return _ComponentManager2.default.get_ids(this._feedback_inputs);
-		}
-	}, {
-		key: 'output',
-		set: function set(output_value) {
-			this._set_cached_output(output_value);
-		}
-
-		//converts the more readable object notation of an Event-object into a more performant array representation ([func_condition, func_action, interval])
-		,
-		get: function get() {
-
-			if (this._cached_output_exists()) {
-				return this.output_cached;
-			}
-
-			if (this.output_is_evaluated) {
-				//circular call detected (input1 refers to input2, input2 refers to input1)
-				if (this._timestep_cache == this.state.timestep - 1) {
-					return this.output_cached; //return output value from previous timestep
-				} else {
-					//this may cause problems since the output value from the previous timestep should be returned consistently, yet it is only calculated in a lazy fashion (computation on request)
-					return null; //output value from previous timestep not available -> return null
-				}
-			}
-
-			this._begin_output_evaluation();
-
-			var output_value = this.compute_output(this.input_values, this.state);
-
-			//do something
-
-			this._set_cached_output(output_value);
-
-			this._end_output_evaluation();
-
-			return output_value;
-		}
-	}, {
-		key: 'events',
-		set: function set(events) {
-			this._events = events;
-
-			//event trace saves an array indicating for each event if it was triggered in the last time step. Important for logging events from outside
-			this.event_trace = _lodash2.default.times(this._events.length, _lodash2.default.constant(false));
-		}
-
-		//returns the current input values to the cell
-
-	}, {
-		key: 'input_values',
-		get: function get() {
-			if (this._inputs.length == 1) {
-				//for single input, pass over input value "by value" instead of "by array"
-				return this.inputs[0].output;
-			} else {
-				return this.inputs.map(function (input) {
-					return input.output;
-				}); //pass over input values "by array"
-			}
-		}
-	}, {
-		key: 'state',
-		set: function set(state) {
-
-			var new_state = {
-				__dynamic_properties: {}
-			};
-
-			var _loop = function _loop(key) {
-				if (state.hasOwnProperty(key)) {
-					var value = state[key];
-
-					if (value instanceof _DynamicVariable2.default) {
-						//state property is dynamic variable
-						new_state.__dynamic_properties[key] = value.clone(); //create clone of dynamic variable and add to __dynamic_properties object
-						Object.defineProperty(new_state, key, {
-							get: function get() {
-								return this.__dynamic_properties[key].value;
-							},
-							set: function set(new_value) {
-								this.__dynamic_properties[key].value = new_value;
-							}
-						});
-					} else {
-						//state property is normal primitive
-						new_state[key] = value;
-					}
-				}
-			};
-
-			for (var key in state) {
-				_loop(key);
-			}
-
-			this._state = new_state;
-		},
-		get: function get() {
-			return this._state;
-		}
-
-		//returns all connections between components in the pool
-
-	}, {
-		key: 'connections',
-		get: function get() {
-			this.connection_dirtybit = false;
-
-			if (this._inputs == null) {
-				return { src: null, target: this.id };
-			} else {
-				return { src: this._inputs.id, target: this.id }; //WARNING: will throw error for
-			}
-		}
-	}]);
-
-	return Component;
-}();
-
-Component.default_init_state = { "timestep": 1 };
-Component.default_events = [];
-Component.countInstances = 0;
-exports.default = Component;
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17728,6 +17234,88 @@ var DynamicVariable = function () {
 exports.default = DynamicVariable;
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ConnectionManager = function () {
+	function ConnectionManager() {
+		_classCallCheck(this, ConnectionManager);
+	}
+
+	_createClass(ConnectionManager, null, [{
+		key: "add_connection",
+		value: function add_connection(source, target, delay, type) {
+			//update state.count_connections
+			return ConnectionManager.active_session.computational_graph.add_connection(source, target, delay, type);
+		} //refers to the number of created edges, iterates in order to generate unique ids
+
+	}, {
+		key: "remove_connection",
+		value: function remove_connection(id) {
+			//update state.count_connections
+			ConnectionManager.active_session.computational_graph.remove_connection(id);
+		}
+	}, {
+		key: "add_node",
+		value: function add_node(node) {
+			ConnectionManager.active_session.computational_graph.add_node(node);
+		}
+	}, {
+		key: "remove_node",
+		value: function remove_node(node) {
+			ConnectionManager.active_session.computational_graph.remove_node(node);
+		}
+	}, {
+		key: "get_in_ids",
+		value: function get_in_ids(node, type) {
+			return ConnectionManager.active_session.computational_graph.get_in_ids(node, type);
+		}
+	}, {
+		key: "get_out_ids",
+		value: function get_out_ids(node, type) {
+			return ConnectionManager.active_session.computational_graph.get_out_ids(node, type);
+		}
+	}, {
+		key: "get_in_connections",
+		value: function get_in_connections(node, type) {
+			return ConnectionManager.active_session.computational_graph.get_in_connections(node, type);
+		}
+	}, {
+		key: "get_out_connections",
+		value: function get_out_connections(node, type) {
+			return ConnectionManager.active_session.computational_graph.get_out_connections(node, type);
+		}
+	}, {
+		key: "resolve_connection",
+		value: function resolve_connection(id) {
+			return ConnectionManager.active_session.computational_graph.resolve_connection(id);
+		}
+	}, {
+		key: "set_active_session",
+		value: function set_active_session(session) {
+			ConnectionManager.active_session = session;
+		}
+	}]);
+
+	return ConnectionManager;
+}();
+
+ConnectionManager.count_instances = 0;
+ConnectionManager.active_session = null;
+exports.default = ConnectionManager;
+
+/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17746,82 +17334,143 @@ var _ComponentTypes = __webpack_require__(4);
 
 var _ComponentTypes2 = _interopRequireDefault(_ComponentTypes);
 
+var _DynamicVariable = __webpack_require__(1);
+
+var _DynamicVariable2 = _interopRequireDefault(_DynamicVariable);
+
+var _GroupContainer = __webpack_require__(16);
+
+var _GroupContainer2 = _interopRequireDefault(_GroupContainer);
+
+var _ConnectionManager = __webpack_require__(2);
+
+var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-//Factory Object for creating components
-//helps to keep track of all Component instances which is very useful for logging of states/connections/etc.
-//helps to increase the performance of adding and removing objects by using the pool design pattern (keeping instances of deleted objects and deliver them later)
 var ComponentManager = function () {
 	function ComponentManager() {
 		_classCallCheck(this, ComponentManager);
 	}
 
 	_createClass(ComponentManager, null, [{
-		key: "create",
-		value: function create(component_type, args) {
-			//TODO implement the pool design pattern
+		key: 'initialize_dynamic_variables',
+		//is managed by executer
 
-			if (ComponentManager.active_session == null) {
-				throw "Error: Cannot create components outside of a session";
+
+		value: function initialize_dynamic_variables(state) {
+
+			var new_state = {
+				__dynamic_properties: {}
+			};
+
+			var _loop = function _loop(key) {
+				if (state.hasOwnProperty(key)) {
+					var value = state[key];
+
+					if (value instanceof _DynamicVariable2.default) {
+						//state property is dynamic variable
+						new_state.__dynamic_properties[key] = value.clone(); //create clone of dynamic variable and add to __dynamic_properties object
+						Object.defineProperty(new_state, key, {
+							get: function get() {
+								return this.__dynamic_properties[key].value;
+							},
+							set: function set(new_value) {
+								this.__dynamic_properties[key].value = new_value;
+							}
+						});
+					} else {
+						//state property is normal primitive
+						new_state[key] = value;
+					}
+				}
+			};
+
+			for (var key in state) {
+				_loop(key);
 			}
 
-			var component = void 0;
-			if (ComponentManager.active_session.specifications[component_type] !== undefined) {
-				component = new _ComponentTypes2.default.Component(_extends({}, ComponentManager.active_session.specifications[component_type], args));
-			} else if (_ComponentTypes2.default[component_type] !== undefined) {
-				component = new _ComponentTypes2.default[component_type](args);
+			this._state = new_state;
+		}
+	}, {
+		key: 'add',
+		value: function add(component_type) {
+			var args = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+
+			var session = ComponentManager.active_session;
+			if (session == null) {
+				throw "Cannot create component outside of a session";
+			}
+
+			var id = ComponentManager.count_instances;
+			ComponentManager.count_instances++; //do this here in order to have unique ids when create() is called recursively
+
+			var schema = void 0;
+			if (session.schemas.hasOwnProperty(component_type)) {
+				schema = session.schemas[component_type];
+			} else if (_ComponentTypes2.default.hasOwnProperty(component_type)) {
+				schema = _ComponentTypes2.default[component_type];
 			} else {
-				throw "Error: the component type " + component_type + " was not defined for the current session";
+				throw 'component type ' + component_type + ' is not defined (yet)';
 			}
 
-			//notify current session that new component was added
-			ComponentManager.active_session.add_component(component, component_type);
-
-			return component.id;
-		}
-	}, {
-		key: "delete",
-		value: function _delete(component) {
-
-			if (ComponentManager.active_session != null) {
-				ComponentManager.active_session.delete_component(component);
+			if (args !== null) {
+				//modify schema by custom fields
+				schema = _extends({}, schema, args);
 			}
+
+			var state = void 0;
+
+			if (component_type == "System") {
+				state = _extends({}, ComponentManager.default_state_properties, schema.init_state);
+				state.members = new _GroupContainer2.default({}); //initialize group access
+				if (schema.hasOwnProperty("init")) {
+					schema.init(state); //call system init function 
+				}
+			} else {
+				state = _extends({}, ComponentManager.default_state_properties, schema.init_state);
+			}
+
+			ComponentManager.initialize_dynamic_variables(state);
+
+			var component = {
+				schema: schema,
+				state: state,
+				current_output: undefined,
+				current_feedback: undefined,
+				last_output: undefined,
+				last_feedback: undefined
+			};
+
+			ComponentManager.active_session.components[id] = component;
+
+			_ConnectionManager2.default.add_node(id);
+			return id;
 		}
 
-		//set the current context of the component factory
+		//removes component with specified id from current session
+		//deletes all links from graphs as well (handled by ConnectionManager)
 
 	}, {
-		key: "set_active_session",
+		key: 'remove',
+		value: function remove(id) {
+			//TODO apply pool method and keep instance for later instantiation
+			delete ComponentManager.active_session.components[id];
+			ComponentManager.active_session.components[0].state.members._remove(id);
+			_ConnectionManager2.default.remove_node(id);
+		}
+	}, {
+		key: 'get_component',
+		value: function get_component(id) {
+			return ComponentManager.active_session.components[id];
+		}
+	}, {
+		key: 'set_active_session',
 		value: function set_active_session(session) {
 			ComponentManager.active_session = session;
-		}
-	}, {
-		key: "add_connection",
-		value: function add_connection(id_from, id_to, type) {
-			ComponentManager.active_session.add_connection(id_from, id_to, type);
-		}
-	}, {
-		key: "remove_connection",
-		value: function remove_connection(id_from, id_to, type) {
-			ComponentManager.active_session.remove_connection(id_from, id_to, type);
-		}
-	}, {
-		key: "get_id",
-		value: function get_id(id) {
-			return ComponentManager.active_session.instances[id];
-		}
-	}, {
-		key: "get_ids",
-		value: function get_ids(ids) {
-			var length = ids.length;
-			var selection = new Array(length);
-			for (var i = 0; i < length; i++) {
-				selection[i] = ComponentManager.active_session.instances[i];
-			}
-
-			return selection;
 		}
 	}]);
 
@@ -17829,6 +17478,8 @@ var ComponentManager = function () {
 }();
 
 ComponentManager.active_session = null;
+ComponentManager.count_instances = 0;
+ComponentManager.default_state_properties = { timestep: undefined };
 exports.default = ComponentManager;
 
 /***/ }),
@@ -17839,1232 +17490,14 @@ exports.default = ComponentManager;
 
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
-
-var _Input = __webpack_require__(9);
-
-var _Input2 = _interopRequireDefault(_Input);
-
-var _Component = __webpack_require__(1);
-
-var _Component2 = _interopRequireDefault(_Component);
-
-var _PatternGenerators = __webpack_require__(21);
-
-var _PatternGenerators2 = _interopRequireDefault(_PatternGenerators);
-
-var _PeriodicPattern = __webpack_require__(10);
-
-var _PeriodicPattern2 = _interopRequireDefault(_PeriodicPattern);
-
-var _Network = __webpack_require__(7);
-
-var _Network2 = _interopRequireDefault(_Network);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Components = {
-	"Input": _Input2.default,
-	"Component": _Component2.default,
-	"PatternGenerators": _PatternGenerators2.default, //Useful?
-	"PeriodicPattern": _PeriodicPattern2.default,
-	"Network": _Network2.default
-};
+var Components = {};
 
 exports.default = Components;
 
 /***/ }),
 /* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _lodash = __webpack_require__(0);
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//generic functions for selecting items out of arrays of objects according to specified principles
-
-//returns the first indices of an array
-var Linear = function Linear() {
-	return function (collection, quantity) {
-		return collection.splice(0, quantity);
-	};
-};
-
-var Random = function Random() {
-
-	return function (collection) {
-		var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-		var selection = [];
-
-		if (collection.length > 0) {
-			for (var i = 0; i < quantity; i++) {
-				selection.push(collection[_lodash2.default.random(0, collection.length - 1)]);
-			}
-		}
-
-		return selection;
-	};
-};
-
-var Max = function Max() {
-	var property = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-
-	if (property === null) {
-		throw "Property for Selector is not specified";
-	}
-
-	return function (collection) {
-		var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-		return _lodash2.default.sortBy(collection, property).slice(collection.length - quantity, collection.length).reverse();
-	};
-};
-
-var Min = function Min() {
-	var property = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-
-	if (property === null) {
-		throw "Property for Selector is not specified";
-	}
-
-	return function (collection) {
-		var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-		return _lodash2.default.sortBy(collection, property).slice(0, quantity);
-	};
-};
-
-var WeightedRandom = function WeightedRandom() {
-	var property = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-
-	if (property === null) {
-		throw "Property for Selector is not specified";
-	}
-
-	return function (collection) {
-		var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-
-		var sum_weights = _lodash2.default.sumBy(collection, property);
-
-		var value = _lodash2.default.random(1, sum_weights, true); //floating number between 1 and the sum of weights
-
-		var selection = [];
-
-		for (var i = 0; i < collection.length; i++) {
-			value -= collection[i][property];
-
-			if (value <= 0) {
-				selection.push(collection[i]);
-				if (quantity == selection.length) {
-					break;
-				}
-			}
-		}
-
-		return selection;
-	};
-};
-
-var Selector = {
-	"Min": Min,
-	"Max": Max,
-	"Random": Random,
-	"WeightedRandom": WeightedRandom,
-	"Linear": Linear
-};
-
-exports.default = Selector;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Logger = function () {
-	function Logger(target) {
-		_classCallCheck(this, Logger);
-
-		this.target = target;
-		this.logs = [];
-	}
-
-	//is overriden by each sub-	class from Logger
-
-
-	_createClass(Logger, [{
-		key: "log",
-		value: function log() {}
-	}, {
-		key: "get_json",
-		value: function get_json() {}
-	}, {
-		key: "get_csv",
-		value: function get_csv() {}
-	}, {
-		key: "target_type",
-		get: function get() {
-			return this.target;
-		}
-	}, {
-		key: "logs",
-		set: function set(logs) {}
-	}]);
-
-	return Logger;
-}();
-
-exports.default = Logger;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-var _lodash = __webpack_require__(0);
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _Component2 = __webpack_require__(1);
-
-var _Component3 = _interopRequireDefault(_Component2);
-
-var _ComponentManager = __webpack_require__(3);
-
-var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
-
-var _Input = __webpack_require__(9);
-
-var _Input2 = _interopRequireDefault(_Input);
-
-var _Output = __webpack_require__(20);
-
-var _Output2 = _interopRequireDefault(_Output);
-
-var _Selector = __webpack_require__(5);
-
-var _Selector2 = _interopRequireDefault(_Selector);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Network = function (_Component) {
-	_inherits(Network, _Component);
-
-	function Network() {
-		var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-		    _ref$components = _ref.components,
-		    components = _ref$components === undefined ? {} : _ref$components,
-		    _ref$connections = _ref.connections,
-		    connections = _ref$connections === undefined ? [] : _ref$connections,
-		    _ref$init = _ref.init,
-		    init = _ref$init === undefined ? function () {} : _ref$init;
-
-		_classCallCheck(this, Network);
-
-		var _this = _possibleConstructorReturn(this, (Network.__proto__ || Object.getPrototypeOf(Network)).apply(this, arguments));
-
-		_this.state.score = 0;
-
-		_this.components = components;
-
-		//Object of Lists of member components, structured by group
-		_this.groups = {
-			"Input": Array.from({ length: _this.max_inputs }, function () {
-				return new _Input2.default();
-			}), //Initial group is input and output components
-			"Output": Array.from({ length: _this.count_outputs }, function () {
-				return new _Output2.default();
-			})
-		};
-
-		_this.state.groups = _this.groups; //ONLY TEMPORARY SOLUTIONS in order to given event condition access to members
-
-		init(_this);
-
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
-
-		try {
-			for (var _iterator = connections[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var connection = _step.value;
-				//connections must be established last, otherwise init was not called and no components exist
-				_this.establish_connection(connection);
-			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
-				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
-				}
-			}
-		}
-
-		return _this;
-	}
-
-	_createClass(Network, [{
-		key: 'apply_feedback',
-		value: function apply_feedback(output, state, feedback) {
-
-			//calculate score of previous prediction	
-			for (var i = 0; i < feedback.length; i++) {
-				if (output[i] === feedback[i]) {
-					state.score += 1.0 / feedback.length;
-				}
-			}
-		}
-	}, {
-		key: 'compute_feedback',
-		value: function compute_feedback(output, state, feedback) {
-			return feedback; //pass on given feedback to output Components
-		}
-	}, {
-		key: '_send_feedback',
-		value: function _send_feedback() {
-			var feedback = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-
-			if (feedback == null) {
-				return;
-			}
-
-			if (feedback.length != this.groups["Output"].length) {
-				throw "Error: Length of feedback and length of output from model do not match";
-			}
-
-			this.groups["Output"].forEach(function (output, index) {
-				return output._receive_feedback(feedback[index]);
-			});
-		}
-
-		//API method for receiving components from the model (applying filter + special selection method)
-		//TODO Selector should not be created for each called, instead store in component
-		//quantity -1 returns all elements with the applied filter
-
-	}, {
-		key: 'select',
-		value: function select(group_name) {
-			var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : -1;
-			var filter_func = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {
-				return true;
-			};
-			var selector = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : _Selector2.default.Random();
-
-			if (!this.groups.hasOwnProperty(group_name)) {
-				return [];
-			} else {
-				//resolve indices
-				var group_items = _ComponentManager2.default.get_ids(this.groups[group_name]);
-				var filtered = group_items.filter(filter_func);
-				if (quantity == -1) {
-					return filtered;
-				} else {
-					return selector(filtered, quantity);
-				}
-			}
-		}
-	}, {
-		key: 'create',
-		value: function create(component_type) {
-			var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-			var groups = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-			var component_args = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
-
-			if (groups.length == 0) {
-				//by default, every new element with unspecified group is placed in the group of its specific type
-				groups = [component_type];
-			}
-
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
-
-			try {
-				for (var _iterator2 = groups[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var group = _step2.value;
-
-					if (!this.groups.hasOwnProperty(group)) {
-						this.groups[group] = [];
-					}
-				}
-			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
-					}
-				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
-					}
-				}
-			}
-
-			var new_components = Array.from({ length: quantity }, function (x) {
-				return _ComponentManager2.default.create(component_type, component_args);
-			});
-
-			//Push created components to groups
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
-
-			try {
-				for (var _iterator3 = groups[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var _group = _step3.value;
-					var _iteratorNormalCompletion4 = true;
-					var _didIteratorError4 = false;
-					var _iteratorError4 = undefined;
-
-					try {
-						for (var _iterator4 = new_components[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-							var component = _step4.value;
-
-							this.groups[_group].push(component);
-						}
-					} catch (err) {
-						_didIteratorError4 = true;
-						_iteratorError4 = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion4 && _iterator4.return) {
-								_iterator4.return();
-							}
-						} finally {
-							if (_didIteratorError4) {
-								throw _iteratorError4;
-							}
-						}
-					}
-				}
-			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
-					}
-				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
-					}
-				}
-			}
-
-			return new_components;
-		}
-	}, {
-		key: 'delete',
-		value: function _delete(component_delete) {
-
-			//delete the reference from the group
-			var _iteratorNormalCompletion5 = true;
-			var _didIteratorError5 = false;
-			var _iteratorError5 = undefined;
-
-			try {
-				for (var _iterator5 = _lodash2.default.keys(this.groups)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-					var group_name = _step5.value;
-
-					var index = _lodash2.default.findIndex(this.groups[group_name], component_delete);
-					if (index != -1) {
-						this.groups[group_name].splice(index, 1); //delete reference
-					}
-				}
-
-				//delete the session instance + resolve all links to it
-			} catch (err) {
-				_didIteratorError5 = true;
-				_iteratorError5 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion5 && _iterator5.return) {
-						_iterator5.return();
-					}
-				} finally {
-					if (_didIteratorError5) {
-						throw _iteratorError5;
-					}
-				}
-			}
-
-			_ComponentManager2.default.delete(component_delete);
-		}
-
-		//connects components of two pools with each other
-
-	}, {
-		key: 'establish_connection',
-		value: function establish_connection(connection) {
-			//src is selector
-			//target is selector
-			//mapper is selector
-
-			//selector should be combination of filter && picker
-
-			var src_components = void 0;
-			var target_components = void 0;
-			if (typeof connection.src == "string") {
-				if (!this.groups.hasOwnProperty(connection.src)) {
-					throw 'False src: group ' + connection.src + ' does not exist';
-				}
-				src_components = this.groups[connection.src];
-			} else if (Array.isArray(connection.src)) {
-				src_components = connection.src;
-			} else {
-				throw "Invalid type given for Connection src", connection.src;
-			}
-
-			if (typeof connection.target == "string") {
-				if (!this.groups.hasOwnProperty(connection.target)) {
-					throw 'False target: group ' + connection.target + ' does not exist';
-				}
-				target_components = this.groups[connection.target];
-			} else if (Array.isArray(connection.target)) {
-				target_components = connection.target;
-			} else {
-				throw "Invalid type given for Connection target";
-			}
-
-			var pairs = connection.mapper(src_components, target_components);
-
-			//reset all existing feedforward and feedback connections
-			if (connection.reset) {
-				var _iteratorNormalCompletion6 = true;
-				var _didIteratorError6 = false;
-				var _iteratorError6 = undefined;
-
-				try {
-					for (var _iterator6 = target_components[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-						var target = _step6.value;
-
-						target.inputs = [];
-					}
-				} catch (err) {
-					_didIteratorError6 = true;
-					_iteratorError6 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion6 && _iterator6.return) {
-							_iterator6.return();
-						}
-					} finally {
-						if (_didIteratorError6) {
-							throw _iteratorError6;
-						}
-					}
-				}
-
-				var _iteratorNormalCompletion7 = true;
-				var _didIteratorError7 = false;
-				var _iteratorError7 = undefined;
-
-				try {
-					for (var _iterator7 = src_components[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-						var source = _step7.value;
-
-						source.feedforward_outputs = [];
-					}
-				} catch (err) {
-					_didIteratorError7 = true;
-					_iteratorError7 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion7 && _iterator7.return) {
-							_iterator7.return();
-						}
-					} finally {
-						if (_didIteratorError7) {
-							throw _iteratorError7;
-						}
-					}
-				}
-			}
-
-			if (connection.type == "feedforward") {
-				var _iteratorNormalCompletion8 = true;
-				var _didIteratorError8 = false;
-				var _iteratorError8 = undefined;
-
-				try {
-					for (var _iterator8 = pairs[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-						var pair = _step8.value;
-
-						pair[1].add_input(pair[0]);
-					}
-				} catch (err) {
-					_didIteratorError8 = true;
-					_iteratorError8 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion8 && _iterator8.return) {
-							_iterator8.return();
-						}
-					} finally {
-						if (_didIteratorError8) {
-							throw _iteratorError8;
-						}
-					}
-				}
-			} else if (connection.type == "feedback") {
-				var _iteratorNormalCompletion9 = true;
-				var _didIteratorError9 = false;
-				var _iteratorError9 = undefined;
-
-				try {
-					for (var _iterator9 = pairs[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-						var _pair = _step9.value;
-
-						_pair[0].add_feedback_output(_pair[1]);
-					}
-				} catch (err) {
-					_didIteratorError9 = true;
-					_iteratorError9 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion9 && _iterator9.return) {
-							_iterator9.return();
-						}
-					} finally {
-						if (_didIteratorError9) {
-							throw _iteratorError9;
-						}
-					}
-				}
-			} else if (connection.type = "bidirectional") {
-				var _iteratorNormalCompletion10 = true;
-				var _didIteratorError10 = false;
-				var _iteratorError10 = undefined;
-
-				try {
-					for (var _iterator10 = pairs[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-						var _pair2 = _step10.value;
-
-						_pair2[1].add_input(_pair2[0]);
-						_pair2[0].add_feedback_output(_pair2[1]);
-					}
-				} catch (err) {
-					_didIteratorError10 = true;
-					_iteratorError10 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion10 && _iterator10.return) {
-							_iterator10.return();
-						}
-					} finally {
-						if (_didIteratorError10) {
-							throw _iteratorError10;
-						}
-					}
-				}
-			} else {
-				throw 'The connection type ' + connection.type + ' does not exist';
-			}
-		}
-	}, {
-		key: 'compute_output',
-		value: function compute_output(inputs, state) {
-			//set output value for input components (MAYBE this should be done in the tick method)
-			this.groups["Input"].forEach(function (input, i) {
-				return input.output = inputs[i];
-			});
-
-			return this.groups["Output"].map(function (output) {
-				return output.output;
-			});
-		}
-
-		//call tick method on all children
-
-	}, {
-		key: 'tick',
-		value: function tick() {
-			_get(Network.prototype.__proto__ || Object.getPrototypeOf(Network.prototype), 'tick', this).call(this);
-
-			//call tick on ressource
-			/*for(let pool of _.values(this.pools)){
-   	pool.tick();
-   }*/
-
-			//call tick on all members
-			for (var component_type in this.groups) {
-				var _iteratorNormalCompletion11 = true;
-				var _didIteratorError11 = false;
-				var _iteratorError11 = undefined;
-
-				try {
-					for (var _iterator11 = this.groups[component_type][Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-						var component = _step11.value;
-
-						component.tick();
-					}
-				} catch (err) {
-					_didIteratorError11 = true;
-					_iteratorError11 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion11 && _iterator11.return) {
-							_iterator11.return();
-						}
-					} finally {
-						if (_didIteratorError11) {
-							throw _iteratorError11;
-						}
-					}
-				}
-			}
-		}
-	}]);
-
-	return Network;
-}(_Component3.default);
-
-exports.default = Network;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _lodash = __webpack_require__(0);
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//every mapper returns a collections of mapping between arr_src and arr_target, uing each target item once
-
-//maps a random element from the src array to every target element
-function Random(arr_src, arr_target) {
-	var map = _lodash2.default.times(arr_target.length, [null, null]); //initialize a multidimensional array
-
-	for (var i = 0; i < arr_target.length; i++) {
-		map[i] = [_lodash2.default.sample(arr_src), arr_target[i]];
-	}
-
-	return map;
-}
-
-//every ith element from the src array maps to the ith element from the target array
-function Linear(arr_src, arr_target) {
-	if (arr_src.length < arr_target.length) {
-		throw "Linear Mapping between source and target array not possible, arr_src<arr_target";
-	}
-
-	var map = _lodash2.default.times(arr_target.length, [null, null]); //initialize a multidimensional array
-
-	for (var i = 0; i < arr_target.length; i++) {
-		map[i] = [arr_src[i], arr_target[i]];
-	}
-
-	return map;
-}
-
-//connects each target unit with each unit from the src target
-//e.g. for fully connecting two layers of artificial neurons
-function FullyConnect(arr_src, arr_target) {
-
-	var count_connections = arr_target.length * arr_src.length;
-	var map = _times(count_connections, [null, null]);
-
-	for (var i = 0; i < count_connections; i++) {
-		map[i] = [arr_src[i % arr_src.length], arr_target[Math.floor(i / arr_target.length)]];
-	}
-
-	return map;
-}
-
-//every element from the src array is used equally often for mappings towards elements of the target array
-function Equal(array_src, arr_target) {
-	var frequency_src = Math.floor(arr_target.length / src_target.length);
-}
-
-var Mapper = {
-	"Random": Random,
-	"Linear": Linear,
-	"Equal": Equal
-};
-
-exports.default = Mapper;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Component2 = __webpack_require__(1);
-
-var _Component3 = _interopRequireDefault(_Component2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Input = function (_Component) {
-	_inherits(Input, _Component);
-
-	function Input() {
-		_classCallCheck(this, Input);
-
-		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-			args[_key] = arguments[_key];
-		}
-
-		return _possibleConstructorReturn(this, (Input.__proto__ || Object.getPrototypeOf(Input)).call(this, args));
-	}
-
-	_createClass(Input, [{
-		key: 'output',
-		set: function set(output) {
-			//POSSIBLE: pass t as well in order to not trigger the same event twice
-			this._output = output;
-		}
-
-		//return the preset value
-		,
-		get: function get() {
-			return this._output;
-		}
-	}]);
-
-	return Input;
-}(_Component3.default);
-
-exports.default = Input;
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Component2 = __webpack_require__(1);
-
-var _Component3 = _interopRequireDefault(_Component2);
-
-var _lodash = __webpack_require__(0);
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var PeriodicPattern = function (_Component) {
-	_inherits(PeriodicPattern, _Component);
-
-	function PeriodicPattern() {
-		var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-		    _ref$period = _ref.period,
-		    period = _ref$period === undefined ? 5 : _ref$period,
-		    _ref$initial_state = _ref.initial_state,
-		    initial_state = _ref$initial_state === undefined ? { last_input: undefined } : _ref$initial_state;
-
-		_classCallCheck(this, PeriodicPattern);
-
-		var _this = _possibleConstructorReturn(this, (PeriodicPattern.__proto__ || Object.getPrototypeOf(PeriodicPattern)).apply(this, arguments));
-
-		if (initial_state.last_input === undefined) {
-			_this.state.last_input = Array.from({ length: _this.max_inputs }, function () {
-				return _lodash2.default.random(0, 1);
-			});
-		}
-
-		_this.state["period"] = period;
-		_this.state["pattern"] = [];
-
-		for (var i = 0; i < _this.state.period; i++) {
-			_this.state.pattern.push(Array.from({ length: _this.max_inputs }, function () {
-				return _lodash2.default.random(0, 1);
-			}));
-		}
-		return _this;
-	}
-
-	//returns as feedback the output of the next time step
-
-
-	_createClass(PeriodicPattern, [{
-		key: 'compute_feedback',
-		value: function compute_feedback(input) {
-			var output = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.output;
-			var state = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.state;
-
-			return this.compute_output(null, _extends({}, state, { timestep: state.timestep + 1 }));
-		}
-	}, {
-		key: 'compute_output',
-		value: function compute_output(inputs, state) {
-			return state.pattern[state.timestep % state.period];
-		}
-	}]);
-
-	return PeriodicPattern;
-}(_Component3.default);
-
-exports.default = PeriodicPattern;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _Mapper = __webpack_require__(8);
-
-var _Mapper2 = _interopRequireDefault(_Mapper);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Connection = function Connection(_ref) {
-	var _ref$src = _ref.src,
-	    src = _ref$src === undefined ? null : _ref$src,
-	    _ref$target = _ref.target,
-	    target = _ref$target === undefined ? null : _ref$target,
-	    _ref$mapper = _ref.mapper,
-	    mapper = _ref$mapper === undefined ? _Mapper2.default.Random : _ref$mapper,
-	    _ref$reset = _ref.reset,
-	    reset = _ref$reset === undefined ? true : _ref$reset,
-	    _ref$type = _ref.type,
-	    type = _ref$type === undefined ? "feedforward" : _ref$type;
-
-	_classCallCheck(this, Connection);
-
-	this.src = src;
-	this.target = target;
-	this.mapper = mapper;
-	this.reset = reset;
-	this.type = type;
-};
-
-exports.default = Connection;
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _Custom = __webpack_require__(22);
-
-var _Custom2 = _interopRequireDefault(_Custom);
-
-var _SlidingAverage = __webpack_require__(25);
-
-var _SlidingAverage2 = _interopRequireDefault(_SlidingAverage);
-
-var _RandomUniform = __webpack_require__(24);
-
-var _RandomUniform2 = _interopRequireDefault(_RandomUniform);
-
-var _FeedbackVariable = __webpack_require__(23);
-
-var _FeedbackVariable2 = _interopRequireDefault(_FeedbackVariable);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var DynamicVariables = {
-	"Custom": _Custom2.default,
-	"SlidingAverage": _SlidingAverage2.default,
-	"RandomUniform": _RandomUniform2.default,
-	"FeedbackVariable": _FeedbackVariable2.default
-};
-
-exports.default = DynamicVariables;
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Event =
-
-//name of the event, 
-function Event(_ref) {
-	var _ref$name = _ref.name,
-	    name = _ref$name === undefined ? "event_" : _ref$name,
-	    _ref$condition = _ref.condition,
-	    condition = _ref$condition === undefined ? function (state) {
-		return true;
-	} : _ref$condition,
-	    _ref$action = _ref.action,
-	    action = _ref$action === undefined ? function (ref) {
-		return null;
-	} : _ref$action,
-	    _ref$interval = _ref.interval,
-	    interval = _ref$interval === undefined ? 1 : _ref$interval,
-	    _ref$init = _ref.init,
-	    init = _ref$init === undefined ? function () {} : _ref$init;
-
-	_classCallCheck(this, Event);
-
-	this.name = name;
-	this.condition = condition;
-	this.action = action;
-	this.interval = interval;
-
-	init.bind(this)();
-	action.bind(this);
-};
-
-exports.default = Event;
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Logger2 = __webpack_require__(6);
-
-var _Logger3 = _interopRequireDefault(_Logger2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var ActivationLogger = function (_Logger) {
-	_inherits(ActivationLogger, _Logger);
-
-	function ActivationLogger(targets) {
-		_classCallCheck(this, ActivationLogger);
-
-		var _this = _possibleConstructorReturn(this, (ActivationLogger.__proto__ || Object.getPrototypeOf(ActivationLogger)).call(this, targets));
-
-		_this.targets = targets;
-		_this.ids = [];
-		_this.activations = [];
-		_this.timesteps = [];
-		return _this;
-	}
-
-	_createClass(ActivationLogger, [{
-		key: 'log',
-		value: function log(component) {
-
-			if (component._cached_output_exists()) {
-				//prevent the logging of un-accessed components in the last time step (lazy loading)
-				this.ids.push(component.id);
-				this.activations.push(component.output);
-				this.timesteps.push(component.state.timestep);
-			}
-		}
-	}, {
-		key: 'logs',
-		get: function get() {
-			var decompressed = [];
-
-			for (var i = 0; i < this.ids.length; i++) {
-				decompressed.push({ id: this.ids[i], value: this.activations[i], t: this.timesteps[i] });
-			}
-
-			return decompressed;
-		},
-		set: function set(logs) {}
-	}]);
-
-	return ActivationLogger;
-}(_Logger3.default);
-
-exports.default = ActivationLogger;
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Logger2 = __webpack_require__(6);
-
-var _Logger3 = _interopRequireDefault(_Logger2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var EventLogger = function (_Logger) {
-	_inherits(EventLogger, _Logger);
-
-	function EventLogger(target) {
-		var events = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
-		_classCallCheck(this, EventLogger);
-
-		var _this = _possibleConstructorReturn(this, (EventLogger.__proto__ || Object.getPrototypeOf(EventLogger)).call(this, target));
-
-		_this.events = events;
-
-		_this.event_names = undefined; //define on the fly
-		_this.ids = [];
-		_this.events = [];
-		_this.timesteps = [];
-		return _this;
-	}
-
-	_createClass(EventLogger, [{
-		key: 'log',
-		value: function log(component) {
-			if (this.event_names === undefined) {
-				this.event_names = component._events.map(function (event) {
-					return event.name;
-				});
-			}
-
-			this.ids.push(component.id);
-			this.events.push(component.event_trace);
-			this.timesteps.push(component.state.timestep);
-		}
-
-		//TODO, split up each individual event into new entry by name e.g {id:12, event:"Reconnect", t:5}
-
-	}, {
-		key: 'logs',
-		get: function get() {
-			var decompressed = [];
-			for (var i = 0; i < this.ids.length; i++) {
-				for (var j = 0; j < this.events[i].length; j++) {
-					if (this.events[i][j]) {
-						decompressed.push({ id: this.ids[i], event: this.event_names[j], t: this.timesteps[i] });
-					}
-				}
-			}
-
-			return decompressed;
-		},
-		set: function set(logs) {}
-	}]);
-
-	return EventLogger;
-}(_Logger3.default);
-
-exports.default = EventLogger;
-
-/***/ }),
-/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19089,50 +17522,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Monitor = function () {
-	function Monitor() {
+	function Monitor(selected_groups) {
 		_classCallCheck(this, Monitor);
 
-		this.state_loggers = [];
-		this.event_loggers = [];
-		this.activation_loggers = [];
-		this.structure_loggers = [];
+		if (!Array.isArray(selected_groups)) {
+			this.selected_groups = [selected_groups];
+		} else {
+			this.selected_groups = selected_groups;
+		}
 	}
 
 	_createClass(Monitor, [{
-		key: 'add',
-		value: function add(logger) {
+		key: 'log',
+		value: function log() {}
 
-			if (logger.constructor.name == "ActivationLogger") {
-				this.activation_loggers.push(logger);
-			} else if (logger.constructor.name == "StateLogger") {
-				this.state_loggers.push(logger);
-			} else if (logger.constructor.name == "EventLogger") {
-				this.event_loggers.push(logger);
-			} else if (logger.constructor.name == "StructureLogger") {
-				this.structure_loggers.push(logger);
-			}
+		//returns selection as string
 
-			return this; //allows method chaining
+	}, {
+		key: 'selection',
+		get: function get() {
+			return this.selected_groups.toString();
 		}
 	}, {
 		key: 'data',
-		get: function get() {
-			//collect all logs 
-			return {
-				states: _lodash2.default.flatten(this.state_loggers.map(function (logger) {
-					return logger.logs;
-				})),
-				events: _lodash2.default.flatten(this.event_loggers.map(function (logger) {
-					return logger.logs;
-				})),
-				activations: _lodash2.default.flatten(this.activation_loggers.map(function (logger) {
-					return logger.logs;
-				})),
-				structure: _lodash2.default.flatten(this.structure_loggers.map(function (logger) {
-					return logger.logs;
-				}))
-			};
-		}
+		set: function set(data) {},
+		get: function get() {}
 	}]);
 
 	return Monitor;
@@ -19141,7 +17555,7 @@ var Monitor = function () {
 exports.default = Monitor;
 
 /***/ }),
-/* 17 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19153,10 +17567,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Logger2 = __webpack_require__(6);
-
-var _Logger3 = _interopRequireDefault(_Logger2);
-
 var _lodash = __webpack_require__(0);
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -19165,56 +17575,272 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var Selection = function () {
+	function Selection(ids, states) {
+		_classCallCheck(this, Selection);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var StateLogger = function (_Logger) {
-	_inherits(StateLogger, _Logger);
-
-	function StateLogger(target, properties, interval) {
-		_classCallCheck(this, StateLogger);
-
-		var _this = _possibleConstructorReturn(this, (StateLogger.__proto__ || Object.getPrototypeOf(StateLogger)).call(this, target));
-
-		_this.interval = interval;
-		_this.properties = properties;
-
-		_this.ids = [];
-		_this.states = [];
-		_this.timesteps = [];
-
-		return _this;
+		this._selected_ids = ids;
+		this._selected_states = states;
 	}
 
-	_createClass(StateLogger, [{
-		key: 'log',
-		value: function log(component) {
-			this.ids.push(component.id);
-			this.states.push(_lodash2.default.pick(component.state, this.properties));
-			this.timesteps.push(component.state.timestep);
-		}
-	}, {
-		key: 'logs',
-		get: function get() {
-			var decompressed = [];
+	_createClass(Selection, [{
+		key: 'max',
+		value: function max(iteratee) {
+			var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
-			for (var i = 0; i < this.ids.length; i++) {
-				decompressed.push({ id: this.ids[i], state: this.states[i], timestep: this.timesteps[i] });
+
+			var length_selection = Math.min(quantity, this._selected_ids.length);
+			var sorted_states = new Array(length_selection);
+			var sorted_ids = new Array(length_selection);
+
+			var states = this._selected_states.slice();
+			var ids = this._selected_ids.slice();
+
+			for (var k = 0; k < quantity; k++) {
+				//perform bubble sort over k steps
+				for (var i = 0; i < states.length - 1; i++) {
+					if (iteratee.apply(null, _lodash2.default.flatten([states[i]])) > iteratee.apply(null, _lodash2.default.flatten([states[i + 1]]))) {
+						//swap
+						this._swap(states, i, i + 1);
+						this._swap(ids, i, i + 1);
+					}
+				}
+
+				sorted_states[k] = states[states.length - k - 1];
+				sorted_ids[k] = ids[ids.length - k - 1];
 			}
 
-			return decompressed;
+			return this.create_sub_selection(sorted_ids, sorted_states);
+		}
+	}, {
+		key: 'min',
+		value: function min(iteratee) {
+			var quantity = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+			var length_selection = Math.min(quantity, this._selected_ids.length);
+			var sorted_states = new Array(length_selection);
+			var sorted_ids = new Array(length_selection);
+
+			var states = this._selected_states.slice();
+			var ids = this._selected_ids.slice();
+
+			for (var k = 0; k < quantity; k++) {
+				//perform bubble sort over k steps
+				for (var i = 0; i < states.length - 1; i++) {
+					if (iteratee.apply(null, _lodash2.default.flatten([states[i]])) < iteratee.apply(null, _lodash2.default.flatten([states[i + 1]]))) {
+						//swap
+						this._swap(states, i, i + 1);
+						this._swap(ids, i, i + 1);
+					}
+				}
+
+				sorted_states[k] = states[states.length - k - 1];
+				sorted_ids[k] = ids[ids.length - k - 1];
+			}
+
+			return this.create_sub_selection(sorted_ids, sorted_states);
+		}
+	}, {
+		key: 'filter',
+		value: function filter(filter_func) {
+
+			var filtered_ids = [];
+			var filtered_states = [];
+			for (var i = 0; i < this._selected_states.length; i++) {
+				if (filter_func.apply(null, _lodash2.default.flatten([this._selected_states[i]]))) {
+					filtered_states.push(this._selected_states[i]);
+					filtered_ids.push(this._selected_ids[i]);
+				}
+			}
+
+			var sub_selected_ids = filtered_ids;
+			var sub_selected_states = filtered_states;
+
+			return this.create_sub_selection(sub_selected_ids, sub_selected_states);
+		}
+	}, {
+		key: 'create_sub_selection',
+		value: function create_sub_selection(sub_ids, sub_states) {
+			var clone = Object.create(Object.getPrototypeOf(this));
+			clone._selected_ids = sub_ids;
+			clone._selected_states = sub_states;
+
+			return clone;
+		}
+	}, {
+		key: 'apply',
+		value: function apply(func) {
+			var length = this._selected_states.length;
+			for (var i = 0; i < length; i++) {
+				func.apply(null, _lodash2.default.flatten([this._selected_states[i], i]));
+			}
+
+			return this;
+		}
+	}, {
+		key: 'sample',
+		value: function sample() {
+			var quantity = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+
+			quantity = Math.min(this._selected_ids.length, quantity);
+
+			var indices = new Array(quantity).map(function (el, i) {
+				return i;
+			});
+			var selected_indices = _lodash2.default.sampleSize(indices, quantity);
+
+			var sampled_ids = new Array(quantity);
+			var sampled_states = new Array(quantity);
+			for (var i = 0; i < selected_indices; i++) {
+				var index = selected_indices[i];
+				sampled_ids[i] = this._selected_ids[index];
+				sampled_states[i] = this._selected_states[index];
+			}
+
+			return this.create_sub_selection(sampled_ids, sampled_states);
+		}
+	}, {
+		key: 'union',
+		value: function union(selection) {
+			if (this.constructor.name != selection.constructor.name) {
+				throw 'trying to union two selections of different types';
+			}
+
+			//for performance optimization iterate over smaller selection
+			var ref = void 0;
+			if (this.length > selection) {
+				ref = this;
+			} else {
+				ref = selection;
+				selection = this;
+			}
+
+			var union_ids = ref._selected_ids.slice();
+			var union_states = ref._selected_states.slice();
+			for (var i = 0; i < selection.length; i++) {
+				if (union_ids.indexOf(selection._selected_ids[i]) == -1) {
+					union_ids.push(selection._selected_ids[i]);
+					union_states.push(selection._selected_states[i]);
+				}
+			}
+
+			return this.create_sub_selection(union_ids, union_states);
+		}
+
+		//iterates over items from selection
+
+	}, {
+		key: Symbol.iterator,
+		value: function value() {
+			var current_index = 0;
+			var length = this.length;
+			var ref = this;
+
+			return {
+				next: function next() {
+					if (current_index < length) {
+						return {
+							done: false,
+							value: ref.create_sub_selection([ref._selected_ids[current_index]], [ref._selected_states[current_index++]])
+						};
+					} else {
+						return { done: true };
+					}
+				}
+			};
+		}
+	}, {
+		key: '_swap',
+		value: function _swap(arr, index1, index2) {
+			var _copy = arr[index1];
+			arr[index1] = arr[index2];
+			arr[index2] = _copy;
+		}
+	}, {
+		key: 'elements',
+		get: function get() {
+			var length = this._selected_ids.length;
+			var sub_selections = new Array(length);
+			for (var i = 0; i < length; i++) {
+				sub_selections[i] = this.create_sub_selection([this._selected_ids[i]], [this._selected_states[i]]);
+			}
+
+			return sub_selections;
 		},
-		set: function set(logs) {}
+		set: function set(el) {
+			//not supported
+		}
+	}, {
+		key: 'ids',
+		get: function get() {
+			return this._selected_ids;
+		},
+		set: function set(ids) {
+			//not supported
+		}
+	}, {
+		key: 'states',
+		get: function get() {
+			return this._selected_states;
+		},
+		set: function set(arg) {
+			//not supported
+		}
+	}, {
+		key: 'length',
+		get: function get() {
+			return this._selected_ids.length;
+		},
+		set: function set(arg) {
+			//not supported
+		}
 	}]);
 
-	return StateLogger;
-}(_Logger3.default);
+	return Selection;
+}();
 
-exports.default = StateLogger;
+exports.default = Selection;
 
 /***/ }),
-/* 18 */
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _Custom = __webpack_require__(9);
+
+var _Custom2 = _interopRequireDefault(_Custom);
+
+var _SlidingAverage = __webpack_require__(12);
+
+var _SlidingAverage2 = _interopRequireDefault(_SlidingAverage);
+
+var _RandomUniform = __webpack_require__(11);
+
+var _RandomUniform2 = _interopRequireDefault(_RandomUniform);
+
+var _FeedbackVariable = __webpack_require__(10);
+
+var _FeedbackVariable2 = _interopRequireDefault(_FeedbackVariable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DynamicVariables = {
+	"Custom": _Custom2.default,
+	"SlidingAverage": _SlidingAverage2.default,
+	"RandomUniform": _RandomUniform2.default,
+	"FeedbackVariable": _FeedbackVariable2.default
+};
+
+exports.default = DynamicVariables;
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19230,13 +17856,29 @@ var _ComponentManager = __webpack_require__(3);
 
 var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
 
+var _ConnectionManager = __webpack_require__(2);
+
+var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
+
+var _ComputationalGraph = __webpack_require__(14);
+
+var _ComputationalGraph2 = _interopRequireDefault(_ComputationalGraph);
+
+var _Executer = __webpack_require__(13);
+
+var _Executer2 = _interopRequireDefault(_Executer);
+
+var _StateMonitor = __webpack_require__(18);
+
+var _StateMonitor2 = _interopRequireDefault(_StateMonitor);
+
+var _ActivationMonitor = __webpack_require__(17);
+
+var _ActivationMonitor2 = _interopRequireDefault(_ActivationMonitor);
+
 var _lodash = __webpack_require__(0);
 
 var _lodash2 = _interopRequireDefault(_lodash);
-
-var _DirectedGraph = __webpack_require__(26);
-
-var _DirectedGraph2 = _interopRequireDefault(_DirectedGraph);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -19245,44 +17887,107 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Session = function () {
 	function Session() {
 		var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "session_name";
-		var system = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-		var monitor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
 		_classCallCheck(this, Session);
 
-		this.timestep = 0;
-
 		this.name = name;
-		this.system = system;
-		this.monitor = monitor;
+		this.schemas = {}; //saves specifications of component types in the form {component_name: spec,...}
 
-		this.specifications = {}; //saves specifications of component types in the form {component_name: spec,...}
+		this.computational_graph = new _ComputationalGraph2.default();
 
-		this.graph_feedforward = new _DirectedGraph2.default();
-		this.graph_feedback = new _DirectedGraph2.default();
+		this.components = {}; //array of all existing instances in the current session (index referes to id)
+		this.executer = new _Executer2.default();
 
-		this.instances = {}; //array of all existing instances in the current session (index referes to id)
+		this.state_monitors = [];
+		this.activation_monitors = [];
 
-		this.component_instances = {}; //flat arrays of components in the current session by type
 		_ComponentManager2.default.set_active_session(this);
+		_ConnectionManager2.default.set_active_session(this);
 	}
 
 	_createClass(Session, [{
-		key: 'define_component',
-		value: function define_component(component_name, specification) {
-			this.specifications[component_name] = specification;
+		key: 'schema',
+		value: function schema(component_name, _schema) {
+			this._validate_schema(_schema);
+			this.schemas[component_name] = _schema;
 			return this;
 		}
 	}, {
-		key: 'set_system',
-		value: function set_system(system) {
-			this.system = system;
+		key: '_validate_schema',
+		value: function _validate_schema(schema) {
+			if (!schema.hasOwnProperty("events")) {
+				schema.events = [];
+			} else {
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = schema.events[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var event = _step.value;
+
+						if (!event.hasOwnProperty("interval")) {
+							event.interval = 1;
+						}
+						if (!event.hasOwnProperty("condition")) {
+							event.condition = function () {
+								return true;
+							};
+						}
+						if (!event.hasOwnProperty("action")) {
+							throw 'Error: Event must have property \'action\'';
+						}
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
+			}
+		}
+
+		//logs state properties of components over time
+
+	}, {
+		key: 'state_monitor',
+		value: function state_monitor(selection, states) {
+			var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+
+			this.state_monitors.push(new _StateMonitor2.default(selection, states, interval));
+			return this;
+		}
+
+		//logs output value or feedback value of components overtime
+
+	}, {
+		key: 'activation_monitor',
+		value: function activation_monitor(selection, type) {
+			var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+
+			this.activation_monitors.push(new _ActivationMonitor2.default(selection, type, interval));
 			return this;
 		}
 	}, {
-		key: 'set_monitor',
-		value: function set_monitor(monitor) {
-			this.monitor = monitor;
+		key: 'system',
+		value: function system(schema) {
+			this._validate_schema(schema);
+			this.schemas["System"] = schema;
+			_ComponentManager2.default.add("System");
+			return this;
+		}
+	}, {
+		key: 'monitor',
+		value: function monitor(_monitor) {
+			this.monitor = _monitor;
 			return this;
 		}
 	}, {
@@ -19290,227 +17995,94 @@ var Session = function () {
 		value: function run() {
 			var iterations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
 
-
-			if (this.system === null) {
-				throw "Error: system cannot be null";
-			}
-			//notify component factory that all new instantiations belong to the context of this session
 			_ComponentManager2.default.set_active_session(this);
+			_ConnectionManager2.default.set_active_session(this);
 
 			for (var i = 0; i < iterations; i++) {
-				this.system.tick();
-				this.log();
-				this.timestep++;
-			}
+				this.executer.next(this.components, this.computational_graph);
+				var groups = this.components[0].state.members._groups;
+				var timestep = this.components[0].state.timestep;
 
-			return this;
-		}
-	}, {
-		key: 'add_component',
-		value: function add_component(component) {
+				var _iteratorNormalCompletion2 = true;
+				var _didIteratorError2 = false;
+				var _iteratorError2 = undefined;
 
-			this.instances[component.id] = component;
-		}
-
-		/*
-  TODO: make more efficient
-  */
-
-	}, {
-		key: 'delete_component',
-		value: function delete_component(component) {
-			var adj_input = this.graph_feedforward.children_nodes(component.id);
-			var adj_feedback = this.graph_feedback.children_nodes(component.id);
-
-			//notify elements that receive feed forward input from the deleted component
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
-
-			try {
-				for (var _iterator = adj_input[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var index = _step.value;
-
-					this.instances[index].on_input_delete(index);
-				}
-
-				//notify elements that receive feedback input from the deleted component
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
 				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
+					for (var _iterator2 = this.state_monitors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+						var state_monitor = _step2.value;
+
+						state_monitor.log(this.components, groups, timestep);
 					}
+				} catch (err) {
+					_didIteratorError2 = true;
+					_iteratorError2 = err;
 				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
-					}
-				}
-			}
-
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
-
-			try {
-				for (var _iterator2 = adj_feedback[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var _index = _step2.value;
-
-					this.instances[_index].on_input_delete(_index);
-				}
-			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
-					}
-				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
-					}
-				}
-			}
-
-			delete this.instances[component.id];
-		}
-	}, {
-		key: 'add_connection',
-		value: function add_connection(id_from, id_to, type) {
-			if (type == "feedforward") {
-				this.graph_feedforward.add_edge(id_from, id_to);
-			} else if (type == "feedforward") {
-				this.graph_feedback.add_edge(id_from, id_to);
-			}
-		}
-	}, {
-		key: 'remove_connection',
-		value: function remove_connection(id_from, id_to, type) {
-			if (type == "feedforward") {
-				this.graph_feedforward.remove_edge(id_from, id_to);
-			} else if (type == "feedback") {
-				this.graph_feedback.remove_edge(id_from, id_to);
-			}
-		}
-	}, {
-		key: 'log',
-		value: function log() {
-			if (this.monitor == null) {
-				return;
-			}
-
-			//for each state logging
-			var _iteratorNormalCompletion3 = true;
-			var _didIteratorError3 = false;
-			var _iteratorError3 = undefined;
-
-			try {
-				for (var _iterator3 = this.monitor.state_loggers[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var state_logger = _step3.value;
-
-					if (this.timestep % state_logger.interval == 0) {
-						var _iteratorNormalCompletion7 = true;
-						var _didIteratorError7 = false;
-						var _iteratorError7 = undefined;
-
-						try {
-							for (var _iterator7 = this.component_instances[state_logger.target_type][Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-								var component = _step7.value;
-
-								state_logger.log(component);
-							}
-						} catch (err) {
-							_didIteratorError7 = true;
-							_iteratorError7 = err;
-						} finally {
-							try {
-								if (!_iteratorNormalCompletion7 && _iterator7.return) {
-									_iterator7.return();
-								}
-							} finally {
-								if (_didIteratorError7) {
-									throw _iteratorError7;
-								}
-							}
+					try {
+						if (!_iteratorNormalCompletion2 && _iterator2.return) {
+							_iterator2.return();
+						}
+					} finally {
+						if (_didIteratorError2) {
+							throw _iteratorError2;
 						}
 					}
 				}
 
-				//activation logging
-			} catch (err) {
-				_didIteratorError3 = true;
-				_iteratorError3 = err;
-			} finally {
+				var _iteratorNormalCompletion3 = true;
+				var _didIteratorError3 = false;
+				var _iteratorError3 = undefined;
+
 				try {
-					if (!_iteratorNormalCompletion3 && _iterator3.return) {
-						_iterator3.return();
+					for (var _iterator3 = this.activation_monitors[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+						var activation_monitor = _step3.value;
+
+						activation_monitor.log(this.components, groups, timestep);
 					}
+				} catch (err) {
+					_didIteratorError3 = true;
+					_iteratorError3 = err;
 				} finally {
-					if (_didIteratorError3) {
-						throw _iteratorError3;
+					try {
+						if (!_iteratorNormalCompletion3 && _iterator3.return) {
+							_iterator3.return();
+						}
+					} finally {
+						if (_didIteratorError3) {
+							throw _iteratorError3;
+						}
 					}
 				}
 			}
+			return this;
+		}
+	}, {
+		key: 'save',
+
+
+		//save session
+		value: function save(filename) {}
+
+		//loads session from file/database and returns session reference
+
+	}, {
+		key: 'data',
+		get: function get() {
+			var data = {
+				name: this.name,
+				states: {},
+				activations: {}
+			};
 
 			var _iteratorNormalCompletion4 = true;
 			var _didIteratorError4 = false;
 			var _iteratorError4 = undefined;
 
 			try {
-				for (var _iterator4 = this.monitor.activation_loggers[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-					var activation_logger = _step4.value;
-					var _iteratorNormalCompletion8 = true;
-					var _didIteratorError8 = false;
-					var _iteratorError8 = undefined;
+				for (var _iterator4 = this.state_monitors[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+					var state_monitor = _step4.value;
 
-					try {
-						for (var _iterator8 = activation_logger.targets[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-							var target_type = _step8.value;
-							var _iteratorNormalCompletion9 = true;
-							var _didIteratorError9 = false;
-							var _iteratorError9 = undefined;
-
-							try {
-								for (var _iterator9 = this.component_instances[target_type][Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-									var _component = _step9.value;
-
-									activation_logger.log(_component); //WARNING SIDE-EFFECT: output is computed in a lazy fashion, monitor forces computation
-								}
-							} catch (err) {
-								_didIteratorError9 = true;
-								_iteratorError9 = err;
-							} finally {
-								try {
-									if (!_iteratorNormalCompletion9 && _iterator9.return) {
-										_iterator9.return();
-									}
-								} finally {
-									if (_didIteratorError9) {
-										throw _iteratorError9;
-									}
-								}
-							}
-						}
-					} catch (err) {
-						_didIteratorError8 = true;
-						_iteratorError8 = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion8 && _iterator8.return) {
-								_iterator8.return();
-							}
-						} finally {
-							if (_didIteratorError8) {
-								throw _iteratorError8;
-							}
-						}
-					}
+					data.states[state_monitor.selection] = state_monitor.data;
 				}
-
-				//event logging
 			} catch (err) {
 				_didIteratorError4 = true;
 				_iteratorError4 = err;
@@ -19531,35 +18103,11 @@ var Session = function () {
 			var _iteratorError5 = undefined;
 
 			try {
-				for (var _iterator5 = this.monitor.event_loggers[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-					var event_logger = _step5.value;
-					var _iteratorNormalCompletion10 = true;
-					var _didIteratorError10 = false;
-					var _iteratorError10 = undefined;
+				for (var _iterator5 = this.activation_monitors[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+					var activation_monitor = _step5.value;
 
-					try {
-						for (var _iterator10 = this.component_instances[event_logger.target_type][Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-							var _component2 = _step10.value;
-
-							event_logger.log(_component2);
-						}
-					} catch (err) {
-						_didIteratorError10 = true;
-						_iteratorError10 = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion10 && _iterator10.return) {
-								_iterator10.return();
-							}
-						} finally {
-							if (_didIteratorError10) {
-								throw _iteratorError10;
-							}
-						}
-					}
+					data.activations[activation_monitor.selection] = activation_monitor.data;
 				}
-
-				//structure logging
 			} catch (err) {
 				_didIteratorError5 = true;
 				_iteratorError5 = err;
@@ -19575,137 +18123,7 @@ var Session = function () {
 				}
 			}
 
-			var _iteratorNormalCompletion6 = true;
-			var _didIteratorError6 = false;
-			var _iteratorError6 = undefined;
-
-			try {
-				for (var _iterator6 = this.monitor.structure_loggers[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-					var structure_logger = _step6.value;
-					var _iteratorNormalCompletion11 = true;
-					var _didIteratorError11 = false;
-					var _iteratorError11 = undefined;
-
-					try {
-						for (var _iterator11 = _lodash2.default.flatten(_lodash2.default.values(this.component_instances))[Symbol.iterator](), _step11; !(_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done); _iteratorNormalCompletion11 = true) {
-							var _component3 = _step11.value;
-
-							structure_logger.log(_component3);
-						}
-					} catch (err) {
-						_didIteratorError11 = true;
-						_iteratorError11 = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion11 && _iterator11.return) {
-								_iterator11.return();
-							}
-						} finally {
-							if (_didIteratorError11) {
-								throw _iteratorError11;
-							}
-						}
-					}
-				}
-			} catch (err) {
-				_didIteratorError6 = true;
-				_iteratorError6 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion6 && _iterator6.return) {
-						_iterator6.return();
-					}
-				} finally {
-					if (_didIteratorError6) {
-						throw _iteratorError6;
-					}
-				}
-			}
-		}
-	}, {
-		key: 'save',
-
-
-		//save session
-		value: function save(filename) {}
-
-		//loads session from file/database and returns session reference
-
-	}, {
-		key: 'tick2',
-
-
-		/*
-  testwise: working without objects
-  */
-		value: function tick2() {
-			var order_feedback = this.graph_feedback.order;
-
-			var _iteratorNormalCompletion12 = true;
-			var _didIteratorError12 = false;
-			var _iteratorError12 = undefined;
-
-			try {
-				for (var _iterator12 = order_feedback[Symbol.iterator](), _step12; !(_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done); _iteratorNormalCompletion12 = true) {
-					var index = _step12.value;
-
-					var instance = this.instances[index];
-					var schema = this.schemas[instance.schema_type];
-				}
-			} catch (err) {
-				_didIteratorError12 = true;
-				_iteratorError12 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion12 && _iterator12.return) {
-						_iterator12.return();
-					}
-				} finally {
-					if (_didIteratorError12) {
-						throw _iteratorError12;
-					}
-				}
-			}
-		}
-	}, {
-		key: 'invoke_feedback',
-		value: function invoke_feedback(schema, index) {
-			var _iteratorNormalCompletion13 = true;
-			var _didIteratorError13 = false;
-			var _iteratorError13 = undefined;
-
-			try {
-				for (var _iterator13 = this.graph_feedback.inputs(index)[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
-					var index_feedback = _step13.value;
-
-					schema.apply_feedback();
-				}
-			} catch (err) {
-				_didIteratorError13 = true;
-				_iteratorError13 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion13 && _iterator13.return) {
-						_iterator13.return();
-					}
-				} finally {
-					if (_didIteratorError13) {
-						throw _iteratorError13;
-					}
-				}
-			}
-		}
-	}, {
-		key: 'data',
-		get: function get() {
-			if (this.monitor == null) {
-				return null;
-			}
-
-			return {
-				name: this.name,
-				data: this.monitor.data
-			};
+			return data;
 		}
 	}], [{
 		key: 'restore_from',
@@ -19715,22 +18133,10 @@ var Session = function () {
 	return Session;
 }();
 
-/*
-Container Object needed (generic component that contains arrays of components of different types)
-interface
-
--select(type,quantity,filter)
-
-Alternative:
--there should be a global register of all existing components in order to be able to log information without nested filter calls
--
-*/
-
-
 exports.default = Session;
 
 /***/ }),
-/* 19 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19742,239 +18148,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ComponentManager = __webpack_require__(3);
-
-var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
-
-var _lodash = __webpack_require__(0);
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var System = function () {
-
-	/*
- @param env_vars: array of dynamic variables
- @param components: array of components, last component is output component
- */
-	function System() {
-		_classCallCheck(this, System);
-
-		this.components = {}; //last el
-		//this.env_vars={};
-		//this.feedback_links=[];
-		this.output_component = null; //generally refers to the latest added component
-	}
-
-	_createClass(System, [{
-		key: 'select',
-		value: function select(component_name) {
-			return this.components[component_name];
-		}
-	}, {
-		key: 'add_component',
-		value: function add_component(component_type) {
-			var args = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-			var name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
-
-			var component = _ComponentManager2.default.create(component_type, args);
-
-			if (name == undefined) {
-				this.components[_lodash2.default.values(this.components).length] = component; //add component in with the index of the next slot
-			} else {
-				this.components[name] = component;
-			}
-
-			this.output_component = component;
-			return this;
-		}
-	}, {
-		key: 'tick',
-		value: function tick() {
-			//components tick
-			var component_arr = _lodash2.default.values(this.components);
-
-			for (var i = 0; i < component_arr.length; i++) {
-				component_arr[i].tick();
-			}
-			/*
-   for(let feedback_link of this.feedback_links){
-   	feedback_link[1].receive_feedback(feedback_link[0].compute_feedback());
-   }*/
-
-			//if lazy computation, otherwise compute all
-			var output = this.output_component.output;
-		}
-
-		/*takes the unit "name_sender" as input for name_receiver
-  for type="Reset", deletes all existing inputs before setting the new one
-  for type="Append" appends input to existing inputs
-  */
-
-	}, {
-		key: 'connect',
-		value: function connect(name_sender, name_receiver) {
-			var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "Reset";
-
-			if (!this.components.hasOwnProperty(name_sender)) {
-				throw 'the component ' + name_sender + ' was not defined yet';
-			}
-			if (!this.components.hasOwnProperty(name_receiver)) {
-				throw 'the component ' + name_receiver + ' was not defined yet';
-			}
-
-			if (type == "Reset") {
-				this.components[name_receiver].inputs = this.components[name_sender];
-			} else {
-				this.components[name_reciever].add_input(this.components[name_sender]);
-			}
-
-			return this;
-		}
-	}, {
-		key: 'set_input_link',
-		value: function set_input_link(name_sender, name_receiver) {
-			if (!this.components.hasOwnProperty(name_sender) || !this.components.hasOwnProperty(name_receiver)) {
-				throw "System Object does not contain on of the referred components: (", name_sender, ", ", name_recevier, ")";
-			}
-
-			this.components[name_receiver].inputs = this.components[name_sender];
-			return this;
-		}
-
-		/*///define a feedback connection between two components (ideal for creating feedback link between a model and some form of performance evaluator)
-  set_feedback_link(name_sender,name_receiver){
-  	if(!this.components.hasOwnProperty(name_sender) || !this.components.hasOwnProperty(name_receiver)){
-  		throw("System Object does not contain on of the referred components: (",name_sender,", ",name_recevier,")");
-  	}
-  		this.feedback_links.push([this.components[name_sender],this.components[name_receiver]]);
-  		return this;
-  }*/
-
-		//defining environment variables for the system
-		/*set env_vars(env_vars){
-  	this._env_vars;
-  }
-  	get variables(){
-  	return this._env_vars;
-  }*/
-
-	}]);
-
-	return System;
-}();
-
-exports.default = System;
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Component2 = __webpack_require__(1);
-
-var _Component3 = _interopRequireDefault(_Component2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Output = function (_Component) {
-	_inherits(Output, _Component);
-
-	function Output() {
-		var _ref;
-
-		_classCallCheck(this, Output);
-
-		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-			args[_key] = arguments[_key];
-		}
-
-		/*if(Array.isArray(this._inputs)){
-  	throw("Error: Output should reference as input only one component, not an array of components");
-  }*/
-		var _this = _possibleConstructorReturn(this, (_ref = Output.__proto__ || Object.getPrototypeOf(Output)).call.apply(_ref, [this].concat(args)));
-
-		_this.count_inputs = 1; //Every Output component has by definition 1 input
-		return _this;
-	}
-
-	_createClass(Output, [{
-		key: 'compute_output',
-		value: function compute_output(inputs, state) {
-			return inputs;
-		}
-
-		//special
-
-	}, {
-		key: 'compute_feedback',
-		value: function compute_feedback(output_target) {
-			var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.state;
-			var output = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : this.output;
-
-			return output;
-		}
-	}]);
-
-	return Output;
-}(_Component3.default);
-
-exports.default = Output;
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _PeriodicPattern = __webpack_require__(10);
-
-var _PeriodicPattern2 = _interopRequireDefault(_PeriodicPattern);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var PatternGenerators = {
-	"PeriodicPattern": _PeriodicPattern2.default
-};
-
-exports.default = PatternGenerators;
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-	value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _DynamicVariable2 = __webpack_require__(2);
+var _DynamicVariable2 = __webpack_require__(1);
 
 var _DynamicVariable3 = _interopRequireDefault(_DynamicVariable2);
 
@@ -20032,7 +18206,7 @@ var Custom = function (_DynamicVariable) {
 exports.default = Custom;
 
 /***/ }),
-/* 23 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20044,7 +18218,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _DynamicVariable2 = __webpack_require__(2);
+var _DynamicVariable2 = __webpack_require__(1);
 
 var _DynamicVariable3 = _interopRequireDefault(_DynamicVariable2);
 
@@ -20104,7 +18278,7 @@ var FeedbackVariable = function (_DynamicVariable) {
 exports.default = FeedbackVariable;
 
 /***/ }),
-/* 24 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20116,7 +18290,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _DynamicVariable2 = __webpack_require__(2);
+var _DynamicVariable2 = __webpack_require__(1);
 
 var _DynamicVariable3 = _interopRequireDefault(_DynamicVariable2);
 
@@ -20171,7 +18345,7 @@ var RandomUniform = function (_DynamicVariable) {
 exports.default = RandomUniform;
 
 /***/ }),
-/* 25 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20183,7 +18357,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _DynamicVariable2 = __webpack_require__(2);
+var _DynamicVariable2 = __webpack_require__(1);
 
 var _DynamicVariable3 = _interopRequireDefault(_DynamicVariable2);
 
@@ -20253,7 +18427,7 @@ var SlidingAverage = function (_DynamicVariable) {
 exports.default = SlidingAverage;
 
 /***/ }),
-/* 26 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20273,13 +18447,423 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var Executer = function () {
+	function Executer() {
+		_classCallCheck(this, Executer);
+
+		this.timestep = 0;
+	}
+
+	_createClass(Executer, [{
+		key: "next",
+		value: function next(components, computational_graph) {
+			var ids = computational_graph.get_order("feedforward");
+			this._tick(components, ids);
+			this._handle_events(components, ids);
+			this._propagate_feedforward(components, computational_graph);
+			this._propagate_feedback(components, computational_graph);
+
+			this.timestep++;
+		}
+	}, {
+		key: "_tick",
+		value: function _tick(components, ids) {
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+
+				for (var _iterator = ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var id = _step.value;
+
+					var component = components[id];
+					component.state.timestep = this.timestep;
+
+					component.last_output = component.current_output;
+					component.current_output = undefined;
+					component.last_feedback = component.current_feedback;
+					component.current_feedback = undefined;
+
+					var _iteratorNormalCompletion2 = true;
+					var _didIteratorError2 = false;
+					var _iteratorError2 = undefined;
+
+					try {
+						for (var _iterator2 = _lodash2.default.values(component.__dynamic_properties)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+							var dyn_var = _step2.value;
+
+							dyn_var.tick();
+						}
+					} catch (err) {
+						_didIteratorError2 = true;
+						_iteratorError2 = err;
+					} finally {
+						try {
+							if (!_iteratorNormalCompletion2 && _iterator2.return) {
+								_iterator2.return();
+							}
+						} finally {
+							if (_didIteratorError2) {
+								throw _iteratorError2;
+							}
+						}
+					}
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+		}
+	}, {
+		key: "_propagate_feedforward",
+		value: function _propagate_feedforward(components, computational_graph) {
+			var ids_ordered = computational_graph.get_order("feedforward");
+
+			var _iteratorNormalCompletion3 = true;
+			var _didIteratorError3 = false;
+			var _iteratorError3 = undefined;
+
+			try {
+				for (var _iterator3 = ids_ordered[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var id = _step3.value;
+
+					var component = components[id];
+
+					if (!component.schema.hasOwnProperty("compute_output")) {
+						component.current_output = undefined;
+						continue;
+					}
+
+					var feedforward_inputs = computational_graph.get_in_connections(id, "feedforward");
+
+					var inputs = new Array(feedforward_inputs.length);
+					for (var i = 0; i < inputs.length; i++) {
+						if (feedforward_inputs[i][2] == 0) {
+							//if delay==0
+							inputs[i] = components[feedforward_inputs[i][0]].current_output;
+						} else {
+							inputs[i] = components[feedforward_inputs[i][0]].last_output;
+						}
+					}
+					component.current_output = component.schema.compute_output(inputs, component.state);
+				}
+			} catch (err) {
+				_didIteratorError3 = true;
+				_iteratorError3 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion3 && _iterator3.return) {
+						_iterator3.return();
+					}
+				} finally {
+					if (_didIteratorError3) {
+						throw _iteratorError3;
+					}
+				}
+			}
+		}
+	}, {
+		key: "_propagate_feedback",
+		value: function _propagate_feedback(components, computational_graph) {
+			var ids_ordered = computational_graph.get_order("feedback");
+
+			var _iteratorNormalCompletion4 = true;
+			var _didIteratorError4 = false;
+			var _iteratorError4 = undefined;
+
+			try {
+				for (var _iterator4 = ids_ordered[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+					var id = _step4.value;
+
+					var component = components[id];
+
+					//fetch and apply all feedback inputs
+					if (component.schema.hasOwnProperty("apply_feedback")) {
+						var feedback_inputs = computational_graph.get_in_connections(id, "feedback");
+						var inputs = new Array(feedback_inputs.length);
+						for (var i = 0; i < inputs.length; i++) {
+							if (feedback_inputs[i][2] == 0) {
+								//if delay==0
+								//apply_feedback(current_output,state,current_feedback_value)
+								component.schema.apply_feedback(component.current_output, component.state, components[feedback_inputs[i][0]].current_feedback);
+							} else {
+								//apply_feedback(current_output,state,current_feedback_value)
+								component.schema.apply_feedback(component.last_output, component.state, components[feedback_inputs[i][0]].last_feedback);
+							}
+						}
+					}
+
+					//compute feedback for component
+					if (component.schema.hasOwnProperty("compute_feedback")) {
+						component.current_feedback = component.schema.compute_feedback(component.current_output, component.state);
+					}
+				}
+			} catch (err) {
+				_didIteratorError4 = true;
+				_iteratorError4 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion4 && _iterator4.return) {
+						_iterator4.return();
+					}
+				} finally {
+					if (_didIteratorError4) {
+						throw _iteratorError4;
+					}
+				}
+			}
+		}
+	}, {
+		key: "_handle_events",
+		value: function _handle_events(components, ids) {
+			var _iteratorNormalCompletion5 = true;
+			var _didIteratorError5 = false;
+			var _iteratorError5 = undefined;
+
+			try {
+
+				for (var _iterator5 = ids[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+					var id = _step5.value;
+
+					var component = components[id];
+					if (!component.schema.hasOwnProperty("events")) {
+						continue;
+					}
+
+					var count_events = component.schema.events.length;
+
+					for (var i = 0; i < count_events; i++) {
+						var event = component.schema.events[i];
+						if (this.timestep % event.interval == 0 && event.condition(component.state)) {
+							event.action(component.state);
+						}
+					}
+				}
+			} catch (err) {
+				_didIteratorError5 = true;
+				_iteratorError5 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion5 && _iterator5.return) {
+						_iterator5.return();
+					}
+				} finally {
+					if (_didIteratorError5) {
+						throw _iteratorError5;
+					}
+				}
+			}
+		}
+	}]);
+
+	return Executer;
+}();
+
+exports.default = Executer;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _DirectedGraph = __webpack_require__(15);
+
+var _DirectedGraph2 = _interopRequireDefault(_DirectedGraph);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ComputationalGraph = function () {
+	function ComputationalGraph() {
+		_classCallCheck(this, ComputationalGraph);
+
+		this.graph_feedforward = new _DirectedGraph2.default();
+		this.graph_feedback = new _DirectedGraph2.default();
+	}
+
+	_createClass(ComputationalGraph, [{
+		key: "add_connection",
+		value: function add_connection(src, target, delay, type) {
+
+			if (type == "feedforward") {
+				return this.graph_feedforward.add_edge(src, target, delay);
+			} else if (type == "feedback") {
+				return this.graph_feedback.add_edge(src, target, delay);
+			} else if (type == "bidirectional") {
+				return [this.graph_feedforward.add_edge(src, target, delay), this.graph_feedback.add_edge(target, src, delay)];
+			} else {
+				throw "Cannot add connection: connection type " + type + " does not exist";
+			}
+		}
+	}, {
+		key: "remove_connection",
+		value: function remove_connection(id) {
+			//no information available which graph holds edge, therefore trigger in both graphs
+			this.graph_feedforward.remove_edge(id);
+			this.graph_feedback.remove_edge(id);
+		}
+	}, {
+		key: "add_node",
+		value: function add_node(node) {
+			this.graph_feedforward.add_node(node);
+			this.graph_feedback.add_node(node);
+		}
+	}, {
+		key: "remove_node",
+		value: function remove_node(node) {
+			this.graph_feedforward.remove_node(node);
+			this.graph_feedback.remove_node(node);
+		}
+	}, {
+		key: "get_in_connections",
+		value: function get_in_connections(node, type) {
+			if (type == "feedforward") {
+				return this.graph_feedforward.get_in_connections(node);
+			} else if (type == "feedback") {
+				return this.graph_feedback.get_in_connections(node);
+			} else {
+				throw "connection type " + type + " does not exist";
+			}
+		}
+
+		//the returns the connections id of all input connections to a node
+
+	}, {
+		key: "get_in_ids",
+		value: function get_in_ids(node, type) {
+			if (type == "feedforward") {
+				return this.graph_feedforward.adj_list_in[node];
+			} else if (type == "feedback") {
+				return this.graph_feedback.adj_list_in[node];
+			} else {
+				throw "connection type " + type + " does not exist";
+			}
+		}
+	}, {
+		key: "get_out_connections",
+		value: function get_out_connections(node, type) {
+			if (type == "feedforward") {
+				return this.graph_feedforward.get_out_connections(node);
+			} else if (type == "feedback") {
+				return this.graph_feedback.get_out_connections(node);
+			} else {
+				throw "connection type " + type + " does not exist";
+			}
+		}
+
+		//the returns the connections id of all output connections to a node
+
+	}, {
+		key: "get_out_ids",
+		value: function get_out_ids(node, type) {
+			if (type == "feedforward") {
+				return this.graph_feedforward.adj_list_out[node];
+			} else if (type == "feedback") {
+				return this.graph_feedback.adj_list_out[node];
+			} else {
+				throw "connection type " + type + " does not exist";
+			}
+		}
+	}, {
+		key: "resolve_connection",
+		value: function resolve_connection(id) {
+			if (this.graph_feedforward.connections.hasOwnProperty(id)) {
+				return this.graph_feedforward.connections[id];
+			} else {
+				return this.graph_feedback.connections[id];
+			}
+		}
+	}, {
+		key: "get_order",
+		value: function get_order(type) {
+			if (type == "feedforward") {
+				return this.graph_feedforward.order;
+			} else if (type == "feedback") {
+				return this.graph_feedback.order;
+			} else {
+				throw "connection type " + type + " does not exist";
+			}
+		}
+	}, {
+		key: "order_feedback",
+		get: function get() {
+			return this.graph_feedback.order;
+		},
+		set: function set(arg) {}
+	}, {
+		key: "order_feedforward",
+		set: function set(arg) {}
+	}]);
+
+	return ComputationalGraph;
+}();
+
+exports.default = ComputationalGraph;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _ConnectionManager = __webpack_require__(2);
+
+var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var INDEX_FROM = 0;
+var INDEX_TO = 1;
+var INDEX_DELAY = 2;
+
 var DirectedGraph = function () {
 	function DirectedGraph() {
 		var nodes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
 
 		_classCallCheck(this, DirectedGraph);
 
-		this.adj_list = {};
+		this._current_connection_id = 0; //iterating ids for connection
+
+		this._order = []; //lists of nodes that need to be called in order
+
+		this.connections = {}; //saves id-> [node_from, node_to, delay]
+
+		this.adj_list_out = {}; //{id1:[id_con1, id_con2]}
+		this.adj_list_in = {};
+
 		var _iteratorNormalCompletion = true;
 		var _didIteratorError = false;
 		var _iteratorError = undefined;
@@ -20288,7 +18872,9 @@ var DirectedGraph = function () {
 			for (var _iterator = nodes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 				var node = _step.value;
 
-				this.adj_list[node] = [];
+				this.adj_list_out[node] = [];
+				this.adj_list_in[node] = [];
+				this.order.push(node);
 			}
 		} catch (err) {
 			_didIteratorError = true;
@@ -20306,117 +18892,696 @@ var DirectedGraph = function () {
 		}
 	}
 
-	//returns all elements that node is connected to
+	//changes position of indices in array so that element of index1 occurs before element of index2
 
 
 	_createClass(DirectedGraph, [{
-		key: 'children_nodes',
-		value: function children_nodes(node) {
-			return this.adj_list[node];
+		key: 'move_before',
+		value: function move_before(arr, index1, index2) {
+			if (index1 < index2) {
+				return;
+			}
+
+			var element = arr.splice(index1, 1)[0];
+			arr.splice(index2, 0, element);
+		}
+
+		//changes position of indices in array so that element of index1 occurs after element of index2
+
+	}, {
+		key: 'move_after',
+		value: function move_after(arr, index1, index2) {
+			if (index1 > index2) {
+				return;
+			}
+
+			var element = arr.splice(index1, 1)[0];
+			arr.splice(index2 + 1, 0, element);
+		}
+	}, {
+		key: 'get_out_connections',
+		value: function get_out_connections(node) {
+			var _this = this;
+
+			return this.adj_list_out[node].map(function (id) {
+				return _this.connections[id];
+			});
+		}
+	}, {
+		key: 'get_in_connections',
+		value: function get_in_connections(node) {
+			var _this2 = this;
+
+			return this.adj_list_in[node].map(function (id) {
+				return _this2.connections[id];
+			});
+		}
+		/*
+  	get_in_edges(node){
+  		return this.adj_list_in[node].map(id=>this.connections[id][INDEX_FROM]);
+  	}
+  	
+  	get_out_edges(node){
+  		return this.adj_list_out[node].map(id=>this.connections[id][INDEX_TO]);
+  	}*/
+
+	}, {
+		key: 'get_order',
+		value: function get_order(node) {
+			return this.order.indexOf(node);
 		}
 	}, {
 		key: 'add_node',
 		value: function add_node(node) {
-			this.adj_list[node] = [];
+			this.adj_list_out[node] = [];
+			this.adj_list_in[node] = [];
+
+			//set order
+			this.order.push(node);
 		}
 	}, {
 		key: 'add_edge',
-		value: function add_edge(node_from, node_to) {
-			this.adj_list[node_from].push(node_to);
-			//check if cyclical
+		value: function add_edge(node_from, node_to, delay) {
+			var id = _ConnectionManager2.default.count_instances;
+			_ConnectionManager2.default.count_instances++;
+
+			this.connections[id] = [node_from, node_to, delay];
+
+			this.adj_list_out[node_from].push(id);
+			this.adj_list_in[node_to].push(id);
+
+			//manage new order of node in computational graph
+			if (delay == 0) {
+				var ord_node_to = this.get_order(node_to);
+				var ord_node_from = this.get_order(node_from);
+
+				if (ord_node_from > ord_node_to) {
+					//if node_to has higher order than node_from, decrease order from node_from to be smaller than the recipient node
+					this.move_before(this.order, ord_node_from, ord_node_to);
+				} //else keep order
+			}
+
+			return id;
 		}
 	}, {
 		key: 'remove_edge',
-		value: function remove_edge(node_from, node_to) {
-			var index = this.adj_list[node_from].indexOf(node_to);
-			this.adj_list[node_from].splice(index, 1);
+		value: function remove_edge(id) {
+			var _this3 = this;
+
+			var connection = this.connections[id];
+
+			if (connection === undefined) {
+				return;
+			}
+
+			//manage new order of node computational graph
+			if (connection[INDEX_DELAY] == 0) {
+				//delay
+
+				var ord_from = this.get_order(connection[INDEX_FROM]);
+				var in_connections = this.get_in_connections(connection[INDEX_FROM]);
+
+				var orders = in_connections.map(function (con) {
+					return _this3.get_order(con[INDEX_FROM]);
+				});
+				var max_in_ord = _lodash2.default.max(orders);
+
+				if (max_in_ord > ord_from) {
+					//if child has higher order than parent (child -> parent), set order of parent higher than child
+					this.move_after(this.order, ord_from, max_in_ord);
+				} //else: keep order
+			}
+
+			var id_from = connection[INDEX_FROM];
+			var id_to = connection[INDEX_TO];
+
+			var adj_in = this.adj_list_in[id_to];
+			var adj_out = this.adj_list_out[id_from];
+
+			adj_out.splice(adj_out.indexOf(id), 1);
+			adj_in.splice(adj_in.indexOf(id), 1);
 		}
 	}, {
-		key: 'find_adjacent_nodes',
-		value: function find_adjacent_nodes(node_from) {
-			return this.adj_list[node_from];
+		key: 'remove_node',
+		value: function remove_node(node) {
+
+			//remove node reference in all nodes receiving input from this node
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this.adj_list_out[node][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var connection_id = _step2.value;
+
+					this.remove_edge(connection_id);
+				}
+
+				//delete reference in order array
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+
+			this.order.splice(this.order.indexOf(node));
+
+			delete this.adj_list_out[node];
+			delete this.adj_list_in[node];
 		}
 	}, {
-		key: 'get_order',
-		value: function get_order() {
+		key: 'order',
+		set: function set(order) {
+			this._order = order;
+		},
+		get: function get() {
+			return this._order;
+		}
+	}]);
 
-			var traverse = function traverse(node, adj_list, list_visited, list_sorted) {
-				if (list_visited.indexOf(node) == -1) {
-					list_visited.push(node);
-					var _iteratorNormalCompletion2 = true;
-					var _didIteratorError2 = false;
-					var _iteratorError2 = undefined;
+	return DirectedGraph;
+}();
 
-					try {
-						for (var _iterator2 = adj_list[node][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-							var branch = _step2.value;
+/*
+	topological order(){
 
-							traverse(branch, adj_list, list_visited, list_sorted);
-						}
-					} catch (err) {
-						_didIteratorError2 = true;
-						_iteratorError2 = err;
-					} finally {
-						try {
-							if (!_iteratorNormalCompletion2 && _iterator2.return) {
-								_iterator2.return();
-							}
-						} finally {
-							if (_didIteratorError2) {
-								throw _iteratorError2;
-							}
-						}
+		let traverse=function(node,adj_list_out,list_visited,list_sorted){
+			if(list_visited.indexOf(node)==-1){
+				list_visited.push(node);
+				for(let branch of adj_list_out[node]){
+					traverse(branch,adj_list_out,list_visited,list_sorted);
+				}
+				list_sorted.push(node);
+			}
+		}
+
+		let nodes=_.keys(this.adj_list_out).map(x=>_.toInteger(x));
+		
+		//start with the lowest key (=the key that was created first)
+		let list_visited=[];
+		let list_sorted=[];
+		
+		for(let node of nodes){
+			if(list_visited.indexOf(node)==-1){
+				list_visited.push(node);
+				for(let child of this.adj_list_out[node]){
+					traverse(child,this.adj_list_out,list_visited,list_sorted);
+				}
+
+				list_sorted.push(node);
+			}
+		}
+
+		return list_sorted.reverse();
+	}
+*/
+
+
+exports.default = DirectedGraph;
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ComponentSelection = __webpack_require__(19);
+
+var _ComponentSelection2 = _interopRequireDefault(_ComponentSelection);
+
+var _ComponentManager = __webpack_require__(3);
+
+var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
+
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GroupContainer = function () {
+	function GroupContainer() {
+		var groups = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+		_classCallCheck(this, GroupContainer);
+
+		this._groups = groups;
+		this._group_names = [];
+	}
+	/*
+ group can be a single string or an array of strings, specifying multiple group memberships
+ */
+
+
+	_createClass(GroupContainer, [{
+		key: 'add',
+		value: function add(component_type, quantity) {
+			var groups = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+			var args = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+			var ids = new Array(quantity);
+			for (var i = 0; i < quantity; i++) {
+				ids[i] = _ComponentManager2.default.add(component_type, args);
+			}
+
+			if (groups == null) {
+				//if groups is not specified, default group name is the component_type
+				groups = [component_type];
+			} else if (!Array.isArray(groups)) {
+				groups = [groups];
+			}
+
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = groups[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var group_name = _step.value;
+
+					if (this._group_names.indexOf(group_name) == -1) {
+						this._group_names.push(group_name);
+						this._groups[group_name] = [];
 					}
 
-					list_sorted.push(node);
+					this._groups[group_name] = this._groups[group_name].concat(ids);
 				}
-			};
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
 
-			var nodes = _lodash2.default.keys(this.adj_list).map(function (x) {
-				return _lodash2.default.toInteger(x);
-			});
+			return new _ComponentSelection2.default(ids);
+		}
+	}, {
+		key: 'select',
+		value: function select() {
+			var _this = this;
 
-			//start with the lowest key (=the key that was created first)
-			var list_visited = [];
-			var list_sorted = [];
+			var group_name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
+			if (Array.isArray(group_name)) {
+				return new _ComponentSelection2.default(_lodash2.default.union.apply(null, group_name.map(function (group) {
+					return _this._groups[group];
+				})));
+			} else {
+				return new _ComponentSelection2.default(this._groups[group_name]);
+			}
+		}
+	}, {
+		key: 'selectAll',
+		value: function selectAll() {
+			return new _ComponentSelection2.default(_lodash2.default.union.apply(null, _lodash2.default.values(this._groups)));
+		}
+
+		//remove reference to id
+
+	}, {
+		key: '_remove',
+		value: function _remove(id) {
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this._group_names[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var group_name = _step2.value;
+
+					var index = this._groups[group_name].indexOf(id);
+					if (index !== -1) {
+						this._groups[group_name].splice(index, 1);
+					}
+				}
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+		}
+	}]);
+
+	return GroupContainer;
+}();
+
+exports.default = GroupContainer;
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Monitor2 = __webpack_require__(5);
+
+var _Monitor3 = _interopRequireDefault(_Monitor2);
+
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ActivationMonitor = function (_Monitor) {
+	_inherits(ActivationMonitor, _Monitor);
+
+	function ActivationMonitor(selection, type, interval) {
+		_classCallCheck(this, ActivationMonitor);
+
+		var _this = _possibleConstructorReturn(this, (ActivationMonitor.__proto__ || Object.getPrototypeOf(ActivationMonitor)).call(this, selection));
+
+		_this.type = type;
+		_this.interval = interval;
+
+		_this.logged_activations = [];
+		_this.logged_ids = [];
+		_this.logged_timesteps = [];
+		return _this;
+	}
+
+	_createClass(ActivationMonitor, [{
+		key: 'log',
+		value: function log(components, groups, timestep) {
+			if (timestep % this.interval == 0) {
+				var selected_ids = _lodash2.default.flatten(this.selected_groups.map(function (group_name) {
+					return groups[group_name];
+				}));
+				var selected_activations = void 0;
+
+				if (this.type == "feedforward") {
+					selected_activations = selected_ids.map(function (id) {
+						return components[id].current_output;
+					});
+				} else {
+					selected_activations = selected_ids.map(function (id) {
+						return components[id].current_feedback;
+					});
+				}
+
+				this.logged_ids = _lodash2.default.concat(this.logged_ids, selected_ids);
+				this.logged_activations = _lodash2.default.concat(this.logged_activations, selected_activations);
+				this.logged_timesteps = _lodash2.default.concat(this.logged_timesteps, _lodash2.default.fill(Array(selected_ids.length), timestep));
+			}
+		}
+	}, {
+		key: 'data',
+		get: function get() {
+
+			var decompressed = [];
+
+			for (var i = 0, length = this.logged_ids.length; i < length; i++) {
+				decompressed.push({ id: this.logged_ids[i], value: this.logged_activations[i], t: this.logged_timesteps[i] });
+			}
+
+			return decompressed;
+		}
+	}]);
+
+	return ActivationMonitor;
+}(_Monitor3.default);
+
+exports.default = ActivationMonitor;
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Monitor2 = __webpack_require__(5);
+
+var _Monitor3 = _interopRequireDefault(_Monitor2);
+
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var StateMonitor = function (_Monitor) {
+	_inherits(StateMonitor, _Monitor);
+
+	function StateMonitor(selected_groups, selected_state_properties, interval) {
+		_classCallCheck(this, StateMonitor);
+
+		var _this = _possibleConstructorReturn(this, (StateMonitor.__proto__ || Object.getPrototypeOf(StateMonitor)).call(this, selected_groups));
+
+		_this.selected_state_properties = selected_state_properties;
+
+		_this.interval = interval;
+
+		_this.logged_states = [];
+		_this.logged_ids = [];
+		_this.logged_timesteps = [];
+		return _this;
+	}
+
+	_createClass(StateMonitor, [{
+		key: '_pick_properties',
+		value: function _pick_properties(obj, properties) {
+			var selection = new Array(properties.length);
+			for (var i = 0; i < properties.length; i++) {
+				selection[i] = obj[properties[i]];
+			}
+
+			return selection;
+		}
+	}, {
+		key: 'log',
+		value: function log(components, groups, timestep) {
+			var _this2 = this;
+
+			if (timestep % this.interval == 0) {
+				var selected_ids = _lodash2.default.flatten(this.selected_groups.map(function (group_name) {
+					return groups[group_name];
+				}));
+
+				var selected_states = selected_ids.map(function (id) {
+					return _this2._pick_properties(components[id].state, _this2.selected_state_properties);
+				});
+
+				this.logged_ids = _lodash2.default.concat(this.logged_ids, selected_ids);
+				this.logged_states = _lodash2.default.concat(this.logged_states, selected_states);
+				this.logged_timesteps = _lodash2.default.concat(this.logged_timesteps, _lodash2.default.fill(Array(selected_ids.length), timestep));
+			}
+		}
+	}, {
+		key: 'data',
+		get: function get() {
+			var decompressed = new Array(this.logged_ids.length);
+
+			for (var i = 0, length = this.logged_ids.length; i < length; i++) {
+				decompressed[i] = { id: this.logged_ids[i], state: this.logged_states[i], t: this.logged_timesteps[i] };
+			}
+
+			return decompressed;
+		}
+	}]);
+
+	return StateMonitor;
+}(_Monitor3.default);
+
+exports.default = StateMonitor;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ComponentManager = __webpack_require__(3);
+
+var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
+
+var _ConnectionManager = __webpack_require__(2);
+
+var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
+
+var _ConnectionSelection = __webpack_require__(20);
+
+var _ConnectionSelection2 = _interopRequireDefault(_ConnectionSelection);
+
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _Selection2 = __webpack_require__(6);
+
+var _Selection3 = _interopRequireDefault(_Selection2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ComponentSelection = function (_Selection) {
+	_inherits(ComponentSelection, _Selection);
+
+	/*
+ initializes selection with a set of ids
+ the corresponding states can be provided optionally and are retrieved from ComponentManager otherwise
+ */
+	function ComponentSelection(ids) {
+		var states = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+
+		_classCallCheck(this, ComponentSelection);
+
+		var _this = _possibleConstructorReturn(this, (ComponentSelection.__proto__ || Object.getPrototypeOf(ComponentSelection)).call(this, ids, states));
+
+		if (_this._selected_states.length != _this._selected_ids.length) {
+			_this._selected_states = _this._resolve_ids(ids);
+		}
+		return _this;
+	}
+
+	_createClass(ComponentSelection, [{
+		key: 'remove',
+		value: function remove() {
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = this._selected_ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var id = _step.value;
+
+					_ComponentManager2.default.remove(id);
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+
+			return this.create_sub_selection([], []);
+		}
+	}, {
+		key: 'input_connections',
+		value: function input_connections(type) {
+			var input_ids = [];
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this._selected_ids[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var id = _step2.value;
+
+					input_ids = input_ids.concat(_ConnectionManager2.default.get_in_ids(id, type));
+				}
+
+				//TODO get all connection ids of feedback inputs to [input_ids];
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
+					}
+				}
+			}
+
+			return new _ConnectionSelection2.default(input_ids, type); //cannot use create_su_selection since new elements are involved and states must be resolved
+		}
+	}, {
+		key: 'output_connections',
+		value: function output_connections(type) {
+			var input_ids = [];
 			var _iteratorNormalCompletion3 = true;
 			var _didIteratorError3 = false;
 			var _iteratorError3 = undefined;
 
 			try {
-				for (var _iterator3 = nodes[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-					var node = _step3.value;
+				for (var _iterator3 = this._selected_ids[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					var id = _step3.value;
 
-					if (list_visited.indexOf(node) == -1) {
-						list_visited.push(node);
-						var _iteratorNormalCompletion4 = true;
-						var _didIteratorError4 = false;
-						var _iteratorError4 = undefined;
-
-						try {
-							for (var _iterator4 = this.adj_list[node][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-								var child = _step4.value;
-
-								traverse(child, this.adj_list, list_visited, list_sorted);
-							}
-						} catch (err) {
-							_didIteratorError4 = true;
-							_iteratorError4 = err;
-						} finally {
-							try {
-								if (!_iteratorNormalCompletion4 && _iterator4.return) {
-									_iterator4.return();
-								}
-							} finally {
-								if (_didIteratorError4) {
-									throw _iteratorError4;
-								}
-							}
-						}
-
-						list_sorted.push(node);
-					}
+					input_ids = input_ids.concat(_ConnectionManager2.default.get_out_ids(id, type));
 				}
 			} catch (err) {
 				_didIteratorError3 = true;
@@ -20433,34 +19598,77 @@ var DirectedGraph = function () {
 				}
 			}
 
-			return list_sorted.reverse();
+			return new _ConnectionSelection2.default(input_ids, type); //cannot use create_su_selection since new elements are involved and states must be resolved
 		}
 	}, {
-		key: 'clear',
-		value: function clear() {
-			this.adj_list = {};
-		}
-	}, {
-		key: 'path_exists',
-		value: function path_exists(node_from, node_to) {}
-	}, {
-		key: 'is_cyclic',
-		value: function is_cyclic(node1, node2) {
-			if (this.path_exists(node2, node1) && this.path_exists(node1, node2)) {
+		key: 'connect',
+		value: function connect() {
+			var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+			    _ref$target = _ref.target,
+			    target = _ref$target === undefined ? null : _ref$target,
+			    _ref$type = _ref.type,
+			    type = _ref$type === undefined ? "feedforward" : _ref$type,
+			    _ref$mapping = _ref.mapping,
+			    mapping = _ref$mapping === undefined ? function (i, j) {
 				return true;
-			} else {
-				return false;
+			} : _ref$mapping,
+			    _ref$delayed = _ref.delayed,
+			    delayed = _ref$delayed === undefined ? false : _ref$delayed,
+			    _ref$reset_connection = _ref.reset_connections,
+			    reset_connections = _ref$reset_connection === undefined ? true : _ref$reset_connection,
+			    _ref$callback_connect = _ref.callback_connected,
+			    callback_connected = _ref$callback_connect === undefined ? null : _ref$callback_connect;
+
+			if (target == null || target.length == 0) {
+				return;
 			}
+
+			var delay = 0;
+			if (delayed) delay = 1;
+
+			var source_states = this.states;
+			var source_ids = this.ids;
+			var target_states = target.states;
+			var target_ids = target.ids;
+
+			var connections = [];
+			for (var i = 0; i < source_ids.length; i++) {
+				for (var j = 0; j < target_ids.length; j++) {
+					if (mapping(i, j, source_states[i], target_states[j])) {
+						//call callback (state1,state2)=>"dosomething"
+						if (callback_connected !== null) {
+							callback_connected(source_states[i], target_states[j]);
+						}
+						//add to graph
+						connections.push(_ConnectionManager2.default.add_connection(source_ids[i], target_ids[j], delay, type));
+					}
+				}
+			}
+
+			//flatten connections because add_connection with type "bidirectional "
+			connections = _lodash2.default.flatten(connections);
+			//return newly created connections
+			return new _ConnectionSelection2.default(connections);
+		}
+
+		//"tunnels" directly to session and fetches states of selected ids
+
+	}, {
+		key: '_resolve_ids',
+		value: function _resolve_ids() {
+			return this._selected_ids.map(function (id) {
+				return _ComponentManager2.default.get_component(id).state;
+			});
 		}
 	}]);
 
-	return DirectedGraph;
-}();
+	return ComponentSelection;
+}(_Selection3.default);
 
-exports.default = DirectedGraph;
+exports.default = ComponentSelection;
 
 /***/ }),
-/* 27 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20469,78 +19677,138 @@ exports.default = DirectedGraph;
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
-exports.EventLogger = exports.ActivationLogger = exports.StateLogger = exports.DynamicVariables = exports.Event = exports.Connection = exports.Mapper = exports.Selector = exports.Network = exports.Components = exports.Monitor = exports.System = exports.Session = undefined;
 
-var _Session = __webpack_require__(18);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ConnectionManager = __webpack_require__(2);
+
+var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
+
+var _ComponentManager = __webpack_require__(3);
+
+var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
+
+var _Selection2 = __webpack_require__(6);
+
+var _Selection3 = _interopRequireDefault(_Selection2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ConnectionSelection = function (_Selection) {
+	_inherits(ConnectionSelection, _Selection);
+
+	function ConnectionSelection(connection_ids, type) {
+		var state_tuples = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+		_classCallCheck(this, ConnectionSelection);
+
+		var _this = _possibleConstructorReturn(this, (ConnectionSelection.__proto__ || Object.getPrototypeOf(ConnectionSelection)).call(this, connection_ids, state_tuples));
+
+		_this._type = type; //type of connection e.g. feedforward or feedback
+		if (_this._selected_ids.length != _this._selected_states.length) {
+			_this._selected_states = _this._resolve_states(connection_ids);
+		}
+		return _this;
+	}
+
+	//removes connection
+
+
+	_createClass(ConnectionSelection, [{
+		key: 'remove',
+		value: function remove() {
+			var callback_removed = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+			if (callback_removed != null) {
+				this.apply(callback_removed);
+			}
+
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
+
+			try {
+				for (var _iterator = this._selected_ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var id = _step.value;
+
+					_ConnectionManager2.default.remove_connection(id, this._type);
+				}
+			} catch (err) {
+				_didIteratorError = true;
+				_iteratorError = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
+					}
+				} finally {
+					if (_didIteratorError) {
+						throw _iteratorError;
+					}
+				}
+			}
+		}
+	}, {
+		key: 'create_sub_selection',
+		value: function create_sub_selection(sub_ids, sub_states) {
+			var clone = Object.create(Object.getPrototypeOf(this));
+			clone._selected_ids = sub_ids;
+			clone._selected_states = sub_states;
+			clone._type = this._type;
+			return clone;
+		}
+	}, {
+		key: '_resolve_states',
+		value: function _resolve_states(ids) {
+			var state_tuples = new Array(ids.length);
+
+			for (var i = 0; i < ids.length; i++) {
+				var connection = _ConnectionManager2.default.resolve_connection(ids[i], this._type);
+				state_tuples[i] = [_ComponentManager2.default.get_component(connection[0]).state, _ComponentManager2.default.get_component(connection[1]).state];
+			}
+
+			return state_tuples;
+		}
+	}]);
+
+	return ConnectionSelection;
+}(_Selection3.default);
+
+exports.default = ConnectionSelection;
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.DynamicVariables = exports.Session = undefined;
+
+var _Session = __webpack_require__(8);
 
 var _Session2 = _interopRequireDefault(_Session);
 
-var _System = __webpack_require__(19);
-
-var _System2 = _interopRequireDefault(_System);
-
-var _Monitor = __webpack_require__(16);
-
-var _Monitor2 = _interopRequireDefault(_Monitor);
-
-var _ComponentTypes = __webpack_require__(4);
-
-var _ComponentTypes2 = _interopRequireDefault(_ComponentTypes);
-
-var _Network = __webpack_require__(7);
-
-var _Network2 = _interopRequireDefault(_Network);
-
-var _Selector = __webpack_require__(5);
-
-var _Selector2 = _interopRequireDefault(_Selector);
-
-var _Mapper = __webpack_require__(8);
-
-var _Mapper2 = _interopRequireDefault(_Mapper);
-
-var _Connection = __webpack_require__(11);
-
-var _Connection2 = _interopRequireDefault(_Connection);
-
-var _Event = __webpack_require__(13);
-
-var _Event2 = _interopRequireDefault(_Event);
-
-var _DynamicVariables = __webpack_require__(12);
+var _DynamicVariables = __webpack_require__(7);
 
 var _DynamicVariables2 = _interopRequireDefault(_DynamicVariables);
-
-var _StateLogger = __webpack_require__(17);
-
-var _StateLogger2 = _interopRequireDefault(_StateLogger);
-
-var _ActivationLogger = __webpack_require__(14);
-
-var _ActivationLogger2 = _interopRequireDefault(_ActivationLogger);
-
-var _EventLogger = __webpack_require__(15);
-
-var _EventLogger2 = _interopRequireDefault(_EventLogger);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.Session = _Session2.default;
-exports.System = _System2.default;
-exports.Monitor = _Monitor2.default;
-exports.Components = _ComponentTypes2.default;
-exports.Network = _Network2.default;
-exports.Selector = _Selector2.default;
-exports.Mapper = _Mapper2.default;
-exports.Connection = _Connection2.default;
-exports.Event = _Event2.default;
 exports.DynamicVariables = _DynamicVariables2.default;
-exports.StateLogger = _StateLogger2.default;
-exports.ActivationLogger = _ActivationLogger2.default;
-exports.EventLogger = _EventLogger2.default;
 
 /***/ }),
-/* 28 */
+/* 22 */
 /***/ (function(module, exports) {
 
 var g;
@@ -20567,7 +19835,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 29 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {

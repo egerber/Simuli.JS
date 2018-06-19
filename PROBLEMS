@@ -30,33 +30,10 @@ How to deal with delay0 connections
 how to compute output from network component based on outputs of group "output"
 -> set inputs of network to group "output" and compute_output returns identical output values
 
-connection object has no information over groups given as name (e.g. target: "Input")
--> all calls must be done via select (e.g. target: select("Input"))
-	- how can system components be accessed?
-		-> implement select method for system schema 
-			- doesnt solve the problem of accessing members by groupname
-				-> saving group names publicly (good for logging)
-					- allows cross system access
-						-> inject additional parameter to select() and create() call which references the ids of all group members 
-							- not possible since the functions are passed as an argument already
-								-> groups are part of the state object (hidden)
-									- groups aren't part of the state
-										-> define new create function (currying) and pass it to event handler
-										-> network IS system and exists as instance 
-											- how to deal with nested systems?
-
-
-how to setup new components (e.g init(), init_state)?
-	-> 
-
-How to dynamically keep track of network topology upon setting up and deleting connections
-	-> 
 
 How to compute the graph topology with partially dealyed and direct connections?
 	-> topology ignores delayed connections and adds them last since they don't need to be called in fixed order
 
-How to define a schema which extends/modifies a currently existing schema (e.g. network functionality with create/select)
-	-> 
 
 apply_feedback(output,state,feedback) does not make sense when feedback is delayed, but also cannot link all outputs together
 	-> save the output value of the feedback recipient together with the corresponding feedback value
@@ -86,6 +63,25 @@ How to manage init() for system?
 -> special case implemented in componentFactory: adds children and selection of groups
 	- how does select/create have access to groups and their ids?
 		-> state.groups returns selection which contains a field of all ids connected to a group
-		   create triggers ComponentFactory.create and adds ids into these fields
+		   create triggers ComponentManager.create and adds ids into these fields
 
-		   
+Deleting connections in graph is ambigious, since x can be connected with y several times with several delay lines
+-> 
+
+How to reset a specific link between two components? (e.g. remove feedforward link from comp1 to comp2 (delay 3))
+-> iterate over selections in order to specify each component individually (new datatype: Virtual_component),
+-> allows to say something like: input1.connect(input2, type="feedforward", port=1)
+	- port selection could be part of the normal connect method (state1, state2)=>state2.used_slots+1
+	- makes it problematic to "append" new connections since it requires iteration over all slots
+
+How or when to initialize connections in the system
+-> maybe as system.connect()
+	- in this case the generation of new members should occur in this section as well
+	- there is no system object onto which a connect() call could be called
+		-> connection can be called in init() function
+
+should the number of currently used slots and max number of slots be part of the state object?
+-> if they do they must be no accessible by user somehow
+
+- DynamicVariable.clone() does not make deep copy if properties are arrays
+

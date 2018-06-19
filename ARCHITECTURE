@@ -1,156 +1,46 @@
-datastructure:
-
-output_values:{
-	id: {current_output, old_output}
-}
-
-feedback_values:{
-	id: {current_value, old_value}
-}
-
-feedforward_inputs:{
-	id: [input1, input2, input3]
-}
-
-feedback_inputs:{
-	id: [input1, input2, input3]
-}
-
-components:{
-	id: {schema, state}
-}
-
-graph_feedforward:
-	- adj_list={
-		id: [target1, target2, target3, ...]
-	}
-	- topology
-	:add_edge(from, to, delay)
-
-graph_feedback:
-	-nodes
-	-adj_list={
-		id: [from1, from2, from3]
-	}
-	- delays={
-		id: [delay1, delay2, delay3]
-	}
-	- topology
-	: add_edge(from,to,delay)
-
-session
-	-system (network) - instance
-		- create() 
-		- select()
-		- init(state,create,select,connect)
-		
-	-loggers (no monitor necessary)
-	-ConnectionManager
-	:run(t)
-	:data
-
-OPTIONAL:
-components by type:
-	e.g. {
-		synapse: [id1,id2,id3,...]
-	}
-components by group:
-	e.g.{
-		"group1": [id1,id2,id3,...]
-	}
-
-------
-
-generate_create_func(groups){
-	return function(type,group,...){
-	}
-}
-
-generate_select_func(groups){
-	return function(group, filter, selector,...){
-	}
-}
-
-fetch_input_values()
-
-fetch_feedback_values()
-
-compute_output_values()
-
-apply_feedback_values(feedback_values, components)
+ActivationCache
 
 tick()
-- increase state.timestep
-- shift current_output to old_output
-- delete current_output
 
-log()
+increaseCache(id,length)
 
-set_connection(from,to,type,delay)
+decrease(id, length)
 
-create_component
- - creates ID
- - applies init_state/state (extends with standard fields)
+get_output(id, delay)
 
- for network:
- 	- generates input group and output group
- 	- calls init itself
+get_feedback(id, delay);
 
-for id0:
+let selection1;
+let selection2;
 
-for event:
- if(condition(state,select))
- 	action(state,create_select(state),create_create(create),create_apply()){
+selection1.connect(selection2, "feedforward", (i,j)=>i==j, p=0.1)
 
- 	}
+connect( (i1,i2,state1,state2)=>i1==i2 || state1.x-1 * random() < 12);
 
-if(condition(state)){
-	action(state){
-		state.children.select("group").filter().sort();
-
-	}
+ComputationalGraph
+connections:{
+	id: [id1,id2,delay,type]
 }
 
------------------
+adj_in{
+	"feedforward": {}.
+	"feedback":{}
+}
 
-session:
-- add_component()
-	- active_session.add()
-- remove_component()
-- add_connection()
-	- session.add_connection()
-- remove_connection()
+order:{
+	"feedforward":[]
+	"feedback":[]
+}
 
-ComponentManager
-active_session
-:create()
-	- ConnectionManager.add_node()
-:remove()
-	- ConnectionManager.remove_node()
+remove(id){
+	check in both feedforward and feedback
+}
 
+move_before(order, element1, element)
+move_after()
 
-
-Executer:
-:execute(graph,components,activationCache)
-:_tick()
-:_fetch_feedforward_inputs()
-:_fetch_feedback_inputs()
-
-:_propagate_feedfoward_activation()
-:_propagate_feedback_activation()
-
-
---- helper objects
-Selection
-- 
-- ids[]
-:remove()
-:apply()
-:create?
-:filter()
-:select()
-:sort()
-- each function returns another selection (or respectively changes the items included)
-	- work with Object.assign();
-
-
+alternatively:
+two-lists
+problem: no unique ids
+	- could be managed by parent
+		-> creates object with holes
