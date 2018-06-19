@@ -110,10 +110,10 @@ let neuron_schema={
 		let sum=0;
 		for(let i=0;i<state.weights.length;i++){
     		sum+=inputs[i]*weights[i];
-    	}
+		}
 
 		return sum;
-   	},
+	},
     compute_feedback(output,state){
     	return; //component is not sending feedback
     },
@@ -261,31 +261,31 @@ let system_schema={
 		{
 			interval:50,
 			action:function(state){
-            	let looser_synapses=state.members.select("synapses").filter((state)=>state.score<0);
+				let looser_synapses=state.members.select("synapses").filter((state)=>state.score<0);
 				let looser_neurons=state.members.select("neurons").min((state)=>state.score,looser_synapses.length);
-                
-                looser_synapses.output_connections("feedforward").remove();
-                looser_synapses.connect({
-                	target:looser_synapses,
-                    type:"bidirectional",
-                    mapping: (i,j)=>i==j,
-                    delayed: false
-                    callback_connect:function(state_synapse,state_neuron){
-                        state_synapse.score=0;
-                        state_neuron.score=0;
-                    }
-                }
+
+				looser_synapses.output_connections("feedforward").remove();
+				looser_synapses.connect({
+					target:looser_synapses,
+				    type:"bidirectional",
+				    mapping: (i,j)=>i==j,
+				    delayed: false
+				    callback_connect:function(state_synapse,state_neuron){
+				        state_synapse.score=0;
+				        state_neuron.score=0;
+				    }
+				}
 			}
 		},
     	{
     		interval:100,
-    		action:function(state){
-    			let synapses=state.members.select("synapses");
+			action:function(state){
+				let synapses=state.members.select("synapses");
 
-    			if(synapses.length>=50){
-    				synapses.min((state)=>score).remove();
-    			}
-    		}
+				if(synapses.length>=50){
+					synapses.min((state)=>score).remove();
+				}
+			}
     	}
 	]
 }
