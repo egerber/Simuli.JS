@@ -15,7 +15,7 @@ Simuli.JS is an open source framework for modeling and simulating systems in dis
 
 import in javascript via
 ```javascript
-import {Session} from 'simulijs';
+import {Session} from 'simuli.js';
 
 let session=new Session("my_new_session")
 ...
