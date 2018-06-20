@@ -11,7 +11,7 @@ Simuli.JS is an open source framework for modeling and simulating systems in dis
 - logging statistics over information flow and system states
 
 ## Installation and Use
-`npm install simulijs`
+`npm install simuli.js`
 
 import in javascript via
 ```javascript
