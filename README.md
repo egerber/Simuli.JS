@@ -300,11 +300,47 @@ In order to run a simulation, a session object must be initialized via `new Sess
 - **`system(system_def)`**
 	- initializes the system by passing the system schema. In order to access the component schemas, the system should be defined after all the components were defined.
 - **`state_monitor(selected_groups,selected_state_properties,interval=1)`**
-	- adds a `StateMonitor` to the session. A state monitor logs the state properties of system components at runtime. `selected_groups` can be a string or an array of strings, referencing one or multiple groups of the system to be monitored. `selected_state_properties` is an array of strings which indicate which properties of the components states should be logged. `interval` specifies the interval at which the values are logged.
+	- adds a `StateMonitor` to the session. A state monitor logs the state properties of system components at runtime. `selected_groups` can be a string or an array of strings, referencing one or multiple groups of the system to be monitored. `selected_state_properties` is an array of strings which indicate which properties of the components states should be logged. `interval` specifies the interval at which the values are logged. This monitor saves the sate properties of all components within the selection at every interval. Therefore this monitor has a high impact on the performance of the simulation and should only be used for a small selection of elements or over a short interval of time. `statistics_monitor()` can be used if only the `[min,max,avg,std]` values of a whole population of components need to be known 
 - **`activation_monitor(selected_groups,activation_type,interval=1)`**
 	- adds an `ActivationMonitor` to the session. An activation monitor logs the activation of systems components at runtime. `selected_groups` can be a string or an array of strings, referencing one or multiple groups of the system to be monitored. `activation_type` can be either `"feedforward"` or `"feedback"` in order to monitor the respective type of activation in the system. `interval` specifies the interval at which the values are logged.
+- **`statistics_monitor(selected_groups,selected_state_properties,interval=1)`**
+	- adds a `StatisticsMonitor` to the session. This monitors aggregates the state properties of all specified components and logs the min, max, mean, and std value at every timestep.
+- **`graph_monitor()`**
+	- sets a `GraphMonitor` for the session. The is monitor keeps track of nodes and connections that are added and removed from the system.
 - **`data`**
-	- returns the data of all logs
+	- returns the data of all logs. The data has the following format:
+```javascript
+{
+	name: "session_name",
+	states:[
+		{id:10,prop:'my_state_property1',val:11.2,t:0},
+		...
+	],
+	feedforward:[
+		{id:10,val:1,t:0},
+		...
+	],
+	feedback:[
+		{id:14,val:-1,t:4},
+		...
+	],
+	statistics:[
+		{group:"group1,group2", prop:"my_state_property1", min:0, max:10, mean:5, std:1},
+		...
+	],
+	graph:{
+		components:[
+			{id:5, group:"my_group1", t:15},
+			...
+		],
+		connections:[
+			{op:"+",id:4,source:15,target:16,delay:1,type:"feedforward",t:12},
+			{op:"-",id:4,t:13},
+			...
+		]
+	},
+}
+```
 
 
 #### Example

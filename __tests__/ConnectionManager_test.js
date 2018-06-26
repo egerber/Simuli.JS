@@ -10,6 +10,7 @@ describe("ConnectionManager",function(){
 			state.members.add("Component",10)
 		}
 	})
+	.init()
 
 	it("add_connection",function(){
 		let id1=ConnectionManager.add_connection(0,1,0,"feedforward");

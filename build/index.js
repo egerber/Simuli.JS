@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 21);
+/******/ 	return __webpack_require__(__webpack_require__.s = 22);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -17178,7 +17178,7 @@ module.exports =
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(22), __webpack_require__(23)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(23), __webpack_require__(24)(module)))
 
 /***/ }),
 /* 1 */
@@ -17338,10 +17338,6 @@ var _DynamicVariable = __webpack_require__(1);
 
 var _DynamicVariable2 = _interopRequireDefault(_DynamicVariable);
 
-var _GroupContainer = __webpack_require__(16);
-
-var _GroupContainer2 = _interopRequireDefault(_GroupContainer);
-
 var _ConnectionManager = __webpack_require__(2);
 
 var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
@@ -17426,7 +17422,8 @@ var ComponentManager = function () {
 
 			if (component_type == "System") {
 				state = _extends({}, ComponentManager.default_state_properties, schema.init_state);
-				state.members = new _GroupContainer2.default({}); //initialize group access
+				state.members = ComponentManager.active_session.group_container;
+
 				if (schema.hasOwnProperty("init")) {
 					schema.init(state); //call system init function 
 				}
@@ -17684,14 +17681,12 @@ var Selection = function () {
 
 			quantity = Math.min(this._selected_ids.length, quantity);
 
-			var indices = new Array(quantity).map(function (el, i) {
-				return i;
-			});
+			var indices = _lodash2.default.range(quantity);
 			var selected_indices = _lodash2.default.sampleSize(indices, quantity);
 
 			var sampled_ids = new Array(quantity);
 			var sampled_states = new Array(quantity);
-			for (var i = 0; i < selected_indices; i++) {
+			for (var i = 0; i < quantity; i++) {
 				var index = selected_indices[i];
 				sampled_ids[i] = this._selected_ids[index];
 				sampled_states[i] = this._selected_states[index];
@@ -17708,7 +17703,7 @@ var Selection = function () {
 
 			//for performance optimization iterate over smaller selection
 			var ref = void 0;
-			if (this.length > selection) {
+			if (this.length >= selection) {
 				ref = this;
 			} else {
 				ref = selection;
@@ -17868,13 +17863,21 @@ var _Executer = __webpack_require__(13);
 
 var _Executer2 = _interopRequireDefault(_Executer);
 
-var _StateMonitor = __webpack_require__(18);
+var _StateMonitor = __webpack_require__(19);
 
 var _StateMonitor2 = _interopRequireDefault(_StateMonitor);
 
 var _ActivationMonitor = __webpack_require__(17);
 
 var _ActivationMonitor2 = _interopRequireDefault(_ActivationMonitor);
+
+var _GraphMonitor = __webpack_require__(18);
+
+var _GraphMonitor2 = _interopRequireDefault(_GraphMonitor);
+
+var _GroupContainer = __webpack_require__(16);
+
+var _GroupContainer2 = _interopRequireDefault(_GroupContainer);
 
 var _lodash = __webpack_require__(0);
 
@@ -17894,15 +17897,20 @@ var Session = function () {
 		this.schemas = {}; //saves specifications of component types in the form {component_name: spec,...}
 
 		this.computational_graph = new _ComputationalGraph2.default();
+		//has to be defined here in order to add references for monitor
+		this.group_container = new _GroupContainer2.default();
 
 		this.components = {}; //array of all existing instances in the current session (index referes to id)
 		this.executer = new _Executer2.default();
 
-		this.state_monitors = [];
-		this.activation_monitors = [];
+		this._state_monitors = [];
+		this._activation_monitors = [];
+		this._graph_monitor = null;
 
 		_ComponentManager2.default.set_active_session(this);
 		_ConnectionManager2.default.set_active_session(this);
+
+		this._initialized = false;
 	}
 
 	_createClass(Session, [{
@@ -17959,10 +17967,10 @@ var Session = function () {
 
 	}, {
 		key: 'state_monitor',
-		value: function state_monitor(selection, states) {
+		value: function state_monitor(selection, state_properties) {
 			var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
 
-			this.state_monitors.push(new _StateMonitor2.default(selection, states, interval));
+			this._state_monitors.push(new _StateMonitor2.default(selection, state_properties, interval));
 			return this;
 		}
 
@@ -17973,7 +17981,42 @@ var Session = function () {
 		value: function activation_monitor(selection, type) {
 			var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
 
-			this.activation_monitors.push(new _ActivationMonitor2.default(selection, type, interval));
+			this._activation_monitors.push(new _ActivationMonitor2.default(selection, type, interval));
+			return this;
+		}
+	}, {
+		key: 'graph_monitor',
+		value: function graph_monitor() {
+			var _this = this;
+
+			if (this._initialized) {
+				throw "Graph Monitor can only be defined prior to the initialization of the system";
+			}
+
+			this._graph_monitor = new _GraphMonitor2.default();
+
+			this.group_container.set_callback_component_added(function () {
+				var _graph_monitor;
+
+				return (_graph_monitor = _this._graph_monitor).notify_add_node.apply(_graph_monitor, arguments);
+			});
+			this.group_container.set_callback_component_removed(function () {
+				var _graph_monitor2;
+
+				return (_graph_monitor2 = _this._graph_monitor).notify_remove_node.apply(_graph_monitor2, arguments);
+			});
+
+			this.computational_graph.set_callback_connection_added(function () {
+				var _graph_monitor3;
+
+				return (_graph_monitor3 = _this._graph_monitor).notify_add_connection.apply(_graph_monitor3, arguments);
+			});
+			this.computational_graph.set_callback_connection_removed(function () {
+				var _graph_monitor4;
+
+				return (_graph_monitor4 = _this._graph_monitor).notify_remove_connection.apply(_graph_monitor4, arguments);
+			});
+
 			return this;
 		}
 	}, {
@@ -17981,19 +18024,27 @@ var Session = function () {
 		value: function system(schema) {
 			this._validate_schema(schema);
 			this.schemas["System"] = schema;
-			_ComponentManager2.default.add("System");
+
 			return this;
 		}
+
+		//adds the system
+
 	}, {
-		key: 'monitor',
-		value: function monitor(_monitor) {
-			this.monitor = _monitor;
+		key: 'init',
+		value: function init() {
+			_ComponentManager2.default.add("System");
 			return this;
 		}
 	}, {
 		key: 'run',
 		value: function run() {
 			var iterations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+
+
+			if (!this._initialized) {
+				this.init();
+			}
 
 			_ComponentManager2.default.set_active_session(this);
 			_ConnectionManager2.default.set_active_session(this);
@@ -18008,7 +18059,7 @@ var Session = function () {
 				var _iteratorError2 = undefined;
 
 				try {
-					for (var _iterator2 = this.state_monitors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					for (var _iterator2 = this._state_monitors[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 						var state_monitor = _step2.value;
 
 						state_monitor.log(this.components, groups, timestep);
@@ -18033,7 +18084,7 @@ var Session = function () {
 				var _iteratorError3 = undefined;
 
 				try {
-					for (var _iterator3 = this.activation_monitors[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+					for (var _iterator3 = this._activation_monitors[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 						var activation_monitor = _step3.value;
 
 						activation_monitor.log(this.components, groups, timestep);
@@ -18052,6 +18103,10 @@ var Session = function () {
 						}
 					}
 				}
+
+				if (this._graph_monitor != null) {
+					this._graph_monitor.tick(); //special case since graph_monitor is notified for every added component/connection
+				}
 			}
 			return this;
 		}
@@ -18069,58 +18124,30 @@ var Session = function () {
 		get: function get() {
 			var data = {
 				name: this.name,
-				states: {},
-				activations: {}
-			};
+				states: [],
+				feedforward: [],
+				feedback: [],
+				graph: []
 
-			var _iteratorNormalCompletion4 = true;
-			var _didIteratorError4 = false;
-			var _iteratorError4 = undefined;
+				//state monitor
+			};data.states = _lodash2.default.concat(this._state_monitors.map(function (monitor) {
+				return monitor.data;
+			}))[0];
+			//feedforward activation
+			data.feedforward = _lodash2.default.concat(this._activation_monitors.filter(function (monitor) {
+				return monitor.type == "feedforward";
+			}).map(function (monitor) {
+				return monitor.data;
+			}))[0];
+			//feedback activation
+			data.feedback = _lodash2.default.concat(this._activation_monitors.filter(function (monitor) {
+				return monitor.type == "feedback";
+			}).map(function (monitor) {
+				return monitor.data;
+			}))[0];
 
-			try {
-				for (var _iterator4 = this.state_monitors[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-					var state_monitor = _step4.value;
-
-					data.states[state_monitor.selection] = state_monitor.data;
-				}
-			} catch (err) {
-				_didIteratorError4 = true;
-				_iteratorError4 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion4 && _iterator4.return) {
-						_iterator4.return();
-					}
-				} finally {
-					if (_didIteratorError4) {
-						throw _iteratorError4;
-					}
-				}
-			}
-
-			var _iteratorNormalCompletion5 = true;
-			var _didIteratorError5 = false;
-			var _iteratorError5 = undefined;
-
-			try {
-				for (var _iterator5 = this.activation_monitors[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-					var activation_monitor = _step5.value;
-
-					data.activations[activation_monitor.selection] = activation_monitor.data;
-				}
-			} catch (err) {
-				_didIteratorError5 = true;
-				_iteratorError5 = err;
-			} finally {
-				try {
-					if (!_iteratorNormalCompletion5 && _iterator5.return) {
-						_iterator5.return();
-					}
-				} finally {
-					if (_didIteratorError5) {
-						throw _iteratorError5;
-					}
-				}
+			if (this._graph_monitor != null) {
+				data.graph = this._graph_monitor.data;
 			}
 
 			return data;
@@ -18697,8 +18724,8 @@ var ComputationalGraph = function () {
 	function ComputationalGraph() {
 		_classCallCheck(this, ComputationalGraph);
 
-		this.graph_feedforward = new _DirectedGraph2.default();
-		this.graph_feedback = new _DirectedGraph2.default();
+		this.graph_feedforward = new _DirectedGraph2.default("feedforward");
+		this.graph_feedback = new _DirectedGraph2.default("feedback");
 	}
 
 	_createClass(ComputationalGraph, [{
@@ -18805,14 +18832,28 @@ var ComputationalGraph = function () {
 			}
 		}
 	}, {
+		key: "set_callback_connection_added",
+		value: function set_callback_connection_added(func) {
+			this.graph_feedforward.set_callback_connection_added(func);
+			this.graph_feedback.set_callback_connection_added(func);
+		}
+	}, {
+		key: "set_callback_connection_removed",
+		value: function set_callback_connection_removed(func) {
+			this.graph_feedforward.set_callback_connection_removed(func);
+			this.graph_feedback.set_callback_connection_removed(func);
+		}
+	}, {
 		key: "order_feedback",
 		get: function get() {
 			return this.graph_feedback.order;
-		},
-		set: function set(arg) {}
-	}, {
-		key: "order_feedforward",
-		set: function set(arg) {}
+		}
+
+		/*	
+  	set order_feedforward(arg){}
+  	set order_feedback(arg){}
+  */
+
 	}]);
 
 	return ComputationalGraph;
@@ -18850,10 +18891,10 @@ var INDEX_TO = 1;
 var INDEX_DELAY = 2;
 
 var DirectedGraph = function () {
-	function DirectedGraph() {
-		var nodes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
+	function DirectedGraph(name) {
 		_classCallCheck(this, DirectedGraph);
+
+		this.name = name; //used internally for callback (feedback vs feedforward)
 
 		this._current_connection_id = 0; //iterating ids for connection
 
@@ -18864,32 +18905,8 @@ var DirectedGraph = function () {
 		this.adj_list_out = {}; //{id1:[id_con1, id_con2]}
 		this.adj_list_in = {};
 
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
-
-		try {
-			for (var _iterator = nodes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var node = _step.value;
-
-				this.adj_list_out[node] = [];
-				this.adj_list_in[node] = [];
-				this.order.push(node);
-			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
-				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
-				}
-			}
-		}
+		this._callback_connection_added = null;
+		this._callback_connection_removed = null;
 	}
 
 	//changes position of indices in array so that element of index1 occurs before element of index2
@@ -18981,6 +18998,10 @@ var DirectedGraph = function () {
 				} //else keep order
 			}
 
+			if (this._callback_connection_added != null) {
+				this._callback_connection_added(id, node_from, node_to, delay, this.name);
+			}
+
 			return id;
 		}
 	}, {
@@ -19020,35 +19041,39 @@ var DirectedGraph = function () {
 
 			adj_out.splice(adj_out.indexOf(id), 1);
 			adj_in.splice(adj_in.indexOf(id), 1);
+
+			if (this._callback_connection_removed != null) {
+				this._callback_connection_removed(id, this.name);
+			}
 		}
 	}, {
 		key: 'remove_node',
 		value: function remove_node(node) {
 
 			//remove node reference in all nodes receiving input from this node
-			var _iteratorNormalCompletion2 = true;
-			var _didIteratorError2 = false;
-			var _iteratorError2 = undefined;
+			var _iteratorNormalCompletion = true;
+			var _didIteratorError = false;
+			var _iteratorError = undefined;
 
 			try {
-				for (var _iterator2 = this.adj_list_out[node][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-					var connection_id = _step2.value;
+				for (var _iterator = this.adj_list_out[node][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+					var connection_id = _step.value;
 
 					this.remove_edge(connection_id);
 				}
 
 				//delete reference in order array
 			} catch (err) {
-				_didIteratorError2 = true;
-				_iteratorError2 = err;
+				_didIteratorError = true;
+				_iteratorError = err;
 			} finally {
 				try {
-					if (!_iteratorNormalCompletion2 && _iterator2.return) {
-						_iterator2.return();
+					if (!_iteratorNormalCompletion && _iterator.return) {
+						_iterator.return();
 					}
 				} finally {
-					if (_didIteratorError2) {
-						throw _iteratorError2;
+					if (_didIteratorError) {
+						throw _iteratorError;
 					}
 				}
 			}
@@ -19057,6 +19082,16 @@ var DirectedGraph = function () {
 
 			delete this.adj_list_out[node];
 			delete this.adj_list_in[node];
+		}
+	}, {
+		key: 'set_callback_connection_added',
+		value: function set_callback_connection_added(func) {
+			this._callback_connection_added = func;
+		}
+	}, {
+		key: 'set_callback_connection_removed',
+		value: function set_callback_connection_removed(func) {
+			this._callback_connection_removed = func;
 		}
 	}, {
 		key: 'order',
@@ -19121,7 +19156,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ComponentSelection = __webpack_require__(19);
+var _ComponentSelection = __webpack_require__(20);
 
 var _ComponentSelection2 = _interopRequireDefault(_ComponentSelection);
 
@@ -19145,6 +19180,9 @@ var GroupContainer = function () {
 
 		this._groups = groups;
 		this._group_names = [];
+		this._callback_component_added = null;
+		this._callback_component_removed = null;
+		this._length = 0; //keeping track of all count members
 	}
 	/*
  group can be a single string or an array of strings, specifying multiple group memberships
@@ -19154,51 +19192,54 @@ var GroupContainer = function () {
 	_createClass(GroupContainer, [{
 		key: 'add',
 		value: function add(component_type, quantity) {
-			var groups = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+			var group_name = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 			var args = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
-			var ids = new Array(quantity);
+			var ids = [];
 			for (var i = 0; i < quantity; i++) {
-				ids[i] = _ComponentManager2.default.add(component_type, args);
+				ids.push(_ComponentManager2.default.add(component_type, args));
 			}
 
-			if (groups == null) {
-				//if groups is not specified, default group name is the component_type
-				groups = [component_type];
-			} else if (!Array.isArray(groups)) {
-				groups = [groups];
-			}
+			if (this._callback_component_added != null) {
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
 
-			var _iteratorNormalCompletion = true;
-			var _didIteratorError = false;
-			var _iteratorError = undefined;
-
-			try {
-				for (var _iterator = groups[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-					var group_name = _step.value;
-
-					if (this._group_names.indexOf(group_name) == -1) {
-						this._group_names.push(group_name);
-						this._groups[group_name] = [];
-					}
-
-					this._groups[group_name] = this._groups[group_name].concat(ids);
-				}
-			} catch (err) {
-				_didIteratorError = true;
-				_iteratorError = err;
-			} finally {
 				try {
-					if (!_iteratorNormalCompletion && _iterator.return) {
-						_iterator.return();
+					for (var _iterator = ids[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var id = _step.value;
+
+						this._callback_component_added(id, group_name);
 					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
 				} finally {
-					if (_didIteratorError) {
-						throw _iteratorError;
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
 					}
 				}
 			}
 
+			if (group_name == null) {
+				//if groups is not specified, default group name is the component_type
+				group_name = component_type;
+			}
+
+			if (this._group_names.indexOf(group_name) == -1) {
+				this._group_names.push(group_name);
+				this._groups[group_name] = [];
+			}
+
+			this._groups[group_name] = this._groups[group_name].concat(ids);
+
+			this._length += quantity;
 			return new _ComponentSelection2.default(ids);
 		}
 	}, {
@@ -19238,6 +19279,7 @@ var GroupContainer = function () {
 					var index = this._groups[group_name].indexOf(id);
 					if (index !== -1) {
 						this._groups[group_name].splice(index, 1);
+						break; //component can only be part of one group
 					}
 				}
 			} catch (err) {
@@ -19254,6 +19296,27 @@ var GroupContainer = function () {
 					}
 				}
 			}
+
+			if (this._callback_component_removed != null) {
+				this._callback_component_removed(id);
+			}
+
+			this._length--;
+		}
+	}, {
+		key: 'set_callback_component_added',
+		value: function set_callback_component_added(func) {
+			this._callback_component_added = func;
+		}
+	}, {
+		key: 'set_callback_component_removed',
+		value: function set_callback_component_removed(func) {
+			this._callback_component_removed = func;
+		}
+	}, {
+		key: 'length',
+		get: function get() {
+			return this._length;
 		}
 	}]);
 
@@ -19364,6 +19427,119 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var GraphMonitor = function () {
+	function GraphMonitor() {
+		_classCallCheck(this, GraphMonitor);
+
+		this.timestep = 0;
+
+		this.node_logs = [];
+		this.feedforward_connection_logs = [];
+		this.feedback_connection_logs = [];
+		this.t = 0;
+	}
+
+	_createClass(GraphMonitor, [{
+		key: "tick",
+		value: function tick() {
+			this.t++;
+		}
+	}, {
+		key: "notify_add_node",
+		value: function notify_add_node(id) {
+			var group = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+			this.node_logs.push({
+				op: "+",
+				id: id,
+				group: group,
+				t: this.t
+			});
+		}
+	}, {
+		key: "notify_remove_node",
+		value: function notify_remove_node(id) {
+			this.node_logs.push({
+				op: "-",
+				id: id,
+				t: this.t
+			});
+		}
+	}, {
+		key: "notify_add_connection",
+		value: function notify_add_connection(id, source, target, delay, type) {
+			var logs = void 0;
+			if (type == "feedforward") {
+				logs = this.feedforward_connection_logs;
+			} else if (type == "feedback") {
+				logs = this.feedback_connection_logs;
+			}
+
+			logs.push({
+				op: "+",
+				id: id,
+				source: source,
+				target: target,
+				delay: delay,
+				t: this.t
+			});
+		}
+	}, {
+		key: "notify_remove_connection",
+		value: function notify_remove_connection(id, type) {
+			var logs = void 0;
+			if (type == "feedforward") {
+				logs = this.feedforward_connection_logs;
+			} else if (type == "feedback") {
+				logs = this.feedback_connection_logs;
+			}
+
+			logs.push({
+				op: "-",
+				id: id,
+				t: this.t
+			});
+		}
+	}, {
+		key: "data",
+		get: function get() {
+			return {
+				nodes: this.node_logs,
+				feedforward_links: this.feedforward_connection_logs,
+				feedback_links: this.feedback_connection_logs
+			};
+		}
+	}]);
+
+	return GraphMonitor;
+}();
+
+/*
+
+t:1, add:{
+	nodes:[1,2,3],
+	connection_ids:[455,125,5]
+	connections:[[1,4,5],[5,5,1],[15,25,2]]
+}*/
+
+
+exports.default = GraphMonitor;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _Monitor2 = __webpack_require__(5);
 
 var _Monitor3 = _interopRequireDefault(_Monitor2);
@@ -19383,16 +19559,20 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var StateMonitor = function (_Monitor) {
 	_inherits(StateMonitor, _Monitor);
 
-	function StateMonitor(selected_groups, selected_state_properties, interval) {
+	function StateMonitor(selected_groups, selected_properties, interval) {
 		_classCallCheck(this, StateMonitor);
 
 		var _this = _possibleConstructorReturn(this, (StateMonitor.__proto__ || Object.getPrototypeOf(StateMonitor)).call(this, selected_groups));
 
-		_this.selected_state_properties = selected_state_properties;
+		_this.selected_properties = selected_properties;
 
 		_this.interval = interval;
 
-		_this.logged_states = [];
+		_this.logged_props = [];
+		for (var i = 0; i < selected_properties.length; i++) {
+			_this.logged_props.push([]);
+		}
+
 		_this.logged_ids = [];
 		_this.logged_timesteps = [];
 		return _this;
@@ -19414,26 +19594,38 @@ var StateMonitor = function (_Monitor) {
 			var _this2 = this;
 
 			if (timestep % this.interval == 0) {
+
 				var selected_ids = _lodash2.default.flatten(this.selected_groups.map(function (group_name) {
 					return groups[group_name];
 				}));
-
 				var selected_states = selected_ids.map(function (id) {
-					return _this2._pick_properties(components[id].state, _this2.selected_state_properties);
+					return components[id].state;
 				});
 
+				var _loop = function _loop(i) {
+					var prop = _this2.selected_properties[i];
+					_this2.logged_props[i] = _lodash2.default.concat(_this2.logged_props[i], selected_states.map(function (state) {
+						return state[prop];
+					}));
+				};
+
+				for (var i = 0; i < this.selected_properties.length; i++) {
+					_loop(i);
+				}
+
 				this.logged_ids = _lodash2.default.concat(this.logged_ids, selected_ids);
-				this.logged_states = _lodash2.default.concat(this.logged_states, selected_states);
 				this.logged_timesteps = _lodash2.default.concat(this.logged_timesteps, _lodash2.default.fill(Array(selected_ids.length), timestep));
 			}
 		}
 	}, {
 		key: 'data',
 		get: function get() {
-			var decompressed = new Array(this.logged_ids.length);
+			var decompressed = new Array(this.logged_ids.length * this.selected_properties.length);
 
 			for (var i = 0, length = this.logged_ids.length; i < length; i++) {
-				decompressed[i] = { id: this.logged_ids[i], state: this.logged_states[i], t: this.logged_timesteps[i] };
+				for (var j = 0, count_props = this.selected_properties.length; j < count_props; j++) {
+					decompressed[length * j + i] = { id: this.logged_ids[i], prop: this.selected_properties[j], value: this.logged_props[j][i], t: this.logged_timesteps[i] };
+				}
 			}
 
 			return decompressed;
@@ -19446,7 +19638,7 @@ var StateMonitor = function (_Monitor) {
 exports.default = StateMonitor;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19466,7 +19658,7 @@ var _ConnectionManager = __webpack_require__(2);
 
 var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
 
-var _ConnectionSelection = __webpack_require__(20);
+var _ConnectionSelection = __webpack_require__(21);
 
 var _ConnectionSelection2 = _interopRequireDefault(_ConnectionSelection);
 
@@ -19668,7 +19860,7 @@ var ComponentSelection = function (_Selection) {
 exports.default = ComponentSelection;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19783,7 +19975,7 @@ var ConnectionSelection = function (_Selection) {
 exports.default = ConnectionSelection;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19808,7 +20000,7 @@ exports.Session = _Session2.default;
 exports.DynamicVariables = _DynamicVariables2.default;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 var g;
@@ -19835,7 +20027,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {

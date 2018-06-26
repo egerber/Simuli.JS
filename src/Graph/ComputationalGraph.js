@@ -3,8 +3,8 @@ import DirectedGraph from './DirectedGraph';
 export default class ComputationalGraph{
 
 	constructor(){
-		this.graph_feedforward=new DirectedGraph();
-		this.graph_feedback=new DirectedGraph();
+		this.graph_feedforward=new DirectedGraph("feedforward");
+		this.graph_feedback=new DirectedGraph("feedback");
 	}
 
 	add_connection(src,target,delay,type){
@@ -99,10 +99,23 @@ export default class ComputationalGraph{
 		}
 	}
 
+	set_callback_connection_added(func){
+		this.graph_feedforward.set_callback_connection_added(func);
+		this.graph_feedback.set_callback_connection_added(func);
+	}
+
+	set_callback_connection_removed(func){
+		this.graph_feedforward.set_callback_connection_removed(func);
+		this.graph_feedback.set_callback_connection_removed(func);
+	}
+
 	get order_feedback(){
 		return this.graph_feedback.order;
 	}
 
+/*	
 	set order_feedforward(arg){}
 	set order_feedback(arg){}
+*/
+
 }

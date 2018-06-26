@@ -8,7 +8,9 @@ const INDEX_DELAY=2;
 
 export default class DirectedGraph{
 
-	constructor(nodes=[]){
+	constructor(name){
+		this.name=name; //used internally for callback (feedback vs feedforward)
+
 		this._current_connection_id=0; //iterating ids for connection
 
 		this._order=[]; //lists of nodes that need to be called in order
@@ -18,11 +20,8 @@ export default class DirectedGraph{
 		this.adj_list_out={}; //{id1:[id_con1, id_con2]}
 		this.adj_list_in={}; 
 		
-		for(let node of nodes){
-			this.adj_list_out[node]=[];
-			this.adj_list_in[node]=[];
-			this.order.push(node);
-		}
+		this._callback_connection_added=null;
+		this._callback_connection_removed=null;
 
 	}
 
@@ -93,6 +92,10 @@ export default class DirectedGraph{
 			}//else keep order
 		}
 
+		if(this._callback_connection_added!=null){
+			this._callback_connection_added(id,node_from,node_to,delay,this.name);
+		}
+
 		return id;
 	}
 
@@ -125,6 +128,10 @@ export default class DirectedGraph{
 
 		adj_out.splice(adj_out.indexOf(id),1);
 		adj_in.splice(adj_in.indexOf(id),1);
+
+		if(this._callback_connection_removed!=null){
+			this._callback_connection_removed(id,this.name);
+		}
 	}
 
 	remove_node(node){
@@ -148,6 +155,14 @@ export default class DirectedGraph{
 	get order(){
 		return this._order;
 	}
+
+	set_callback_connection_added(func){
+		this._callback_connection_added=func;
+	}
+
+	set_callback_connection_removed(func){
+		this._callback_connection_removed=func;
+	}	
 
 }
 
