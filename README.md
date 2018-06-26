@@ -210,11 +210,11 @@ An instance of `ComponentSelection` bundles one or several components and allows
 #####  Example Connection
 ```javascript
 	selection_source.connect({
-        target: selection_target,
-        type: "feedforward",
-        mapping: (i,j,state_source,state_target)=>state_source.score>state_target.score,
-        delayed: true,
-        callback_connected: (state_source, state_target)=>state_target.count_input_connections++
+		target: selection_target,
+		type: "feedforward",
+		mapping: (i,j,state_source,state_target)=>state_source.score>state_target.score,
+		delayed: true,
+		callback_connected: (state_source, state_target)=>state_target.count_input_connections++
 	})
 ```
 Description: connects all pairs of components from the source selection and target selection where the source component has a smaller score than the target component. For every established connection between the source and the target selection, the target component increments `count_input_connections`
