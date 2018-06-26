@@ -64,7 +64,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 23);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -17178,7 +17178,7 @@ module.exports =
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(23), __webpack_require__(24)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(24), __webpack_require__(25)(module)))
 
 /***/ }),
 /* 1 */
@@ -17330,7 +17330,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ComponentTypes = __webpack_require__(4);
+var _ComponentTypes = __webpack_require__(5);
 
 var _ComponentTypes2 = _interopRequireDefault(_ComponentTypes);
 
@@ -17487,20 +17487,6 @@ exports.default = ComponentManager;
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var Components = {};
-
-exports.default = Components;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
@@ -17510,7 +17496,7 @@ var _lodash = __webpack_require__(0);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _ComponentTypes = __webpack_require__(4);
+var _ComponentTypes = __webpack_require__(5);
 
 var _ComponentTypes2 = _interopRequireDefault(_ComponentTypes);
 
@@ -17550,6 +17536,20 @@ var Monitor = function () {
 }();
 
 exports.default = Monitor;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Components = {};
+
+exports.default = Components;
 
 /***/ }),
 /* 6 */
@@ -17875,6 +17875,10 @@ var _GraphMonitor = __webpack_require__(18);
 
 var _GraphMonitor2 = _interopRequireDefault(_GraphMonitor);
 
+var _StatisticsMonitor = __webpack_require__(20);
+
+var _StatisticsMonitor2 = _interopRequireDefault(_StatisticsMonitor);
+
 var _GroupContainer = __webpack_require__(16);
 
 var _GroupContainer2 = _interopRequireDefault(_GroupContainer);
@@ -17905,6 +17909,7 @@ var Session = function () {
 
 		this._state_monitors = [];
 		this._activation_monitors = [];
+		this._statistics_monitors = [];
 		this._graph_monitor = null;
 
 		_ComponentManager2.default.set_active_session(this);
@@ -18020,6 +18025,14 @@ var Session = function () {
 			return this;
 		}
 	}, {
+		key: 'statistics_monitor',
+		value: function statistics_monitor(selection, state_properties) {
+			var interval = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+
+			this._statistics_monitors.push(new _StatisticsMonitor2.default(selection, state_properties, interval));
+			return this;
+		}
+	}, {
 		key: 'system',
 		value: function system(schema) {
 			this._validate_schema(schema);
@@ -18104,6 +18117,31 @@ var Session = function () {
 					}
 				}
 
+				var _iteratorNormalCompletion4 = true;
+				var _didIteratorError4 = false;
+				var _iteratorError4 = undefined;
+
+				try {
+					for (var _iterator4 = this._statistics_monitors[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+						var statistics_monitor = _step4.value;
+
+						statistics_monitor.log(this.components, groups, timestep);
+					}
+				} catch (err) {
+					_didIteratorError4 = true;
+					_iteratorError4 = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion4 && _iterator4.return) {
+							_iterator4.return();
+						}
+					} finally {
+						if (_didIteratorError4) {
+							throw _iteratorError4;
+						}
+					}
+				}
+
 				if (this._graph_monitor != null) {
 					this._graph_monitor.tick(); //special case since graph_monitor is notified for every added component/connection
 				}
@@ -18127,7 +18165,8 @@ var Session = function () {
 				states: [],
 				feedforward: [],
 				feedback: [],
-				graph: []
+				graph: [],
+				statistics: []
 
 				//state monitor
 			};data.states = _lodash2.default.concat(this._state_monitors.map(function (monitor) {
@@ -18143,6 +18182,10 @@ var Session = function () {
 			data.feedback = _lodash2.default.concat(this._activation_monitors.filter(function (monitor) {
 				return monitor.type == "feedback";
 			}).map(function (monitor) {
+				return monitor.data;
+			}))[0];
+			//statistics
+			data.statistics = _lodash2.default.concat(this._statistics_monitors.map(function (monitor) {
 				return monitor.data;
 			}))[0];
 
@@ -19156,7 +19199,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ComponentSelection = __webpack_require__(20);
+var _ComponentSelection = __webpack_require__(21);
 
 var _ComponentSelection2 = _interopRequireDefault(_ComponentSelection);
 
@@ -19338,7 +19381,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Monitor2 = __webpack_require__(5);
+var _Monitor2 = __webpack_require__(4);
 
 var _Monitor3 = _interopRequireDefault(_Monitor2);
 
@@ -19427,6 +19470,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var GraphMonitor = function () {
@@ -19505,25 +19554,25 @@ var GraphMonitor = function () {
 	}, {
 		key: "data",
 		get: function get() {
+			var connections_feedforward = this.feedforward_connection_logs;
+			var connections_feedback = this.feedback_connection_logs;
+
+			connections_feedforward.map(function (con) {
+				return con.type = "feedforward";
+			});
+			connections_feedback.map(function (con) {
+				return con.type = "feedback";
+			});
 			return {
-				nodes: this.node_logs,
-				feedforward_links: this.feedforward_connection_logs,
-				feedback_links: this.feedback_connection_logs
+				components: this.node_logs,
+				connections: _lodash2.default.concat(connections_feedforward, connections_feedback)
+
 			};
 		}
 	}]);
 
 	return GraphMonitor;
 }();
-
-/*
-
-t:1, add:{
-	nodes:[1,2,3],
-	connection_ids:[455,125,5]
-	connections:[[1,4,5],[5,5,1],[15,25,2]]
-}*/
-
 
 exports.default = GraphMonitor;
 
@@ -19540,7 +19589,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Monitor2 = __webpack_require__(5);
+var _Monitor2 = __webpack_require__(4);
 
 var _Monitor3 = _interopRequireDefault(_Monitor2);
 
@@ -19650,6 +19699,164 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _Monitor2 = __webpack_require__(4);
+
+var _Monitor3 = _interopRequireDefault(_Monitor2);
+
+var _lodash = __webpack_require__(0);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/*
+Helper functions 
+*/
+
+function std(values) {
+	var mean = avg(values);
+
+	var squareDiffs = values.map(function (value) {
+		var diff = value - mean;
+		var sqrDiff = diff * diff;
+		return sqrDiff;
+	});
+
+	var avgSquareDiff = avg(squareDiffs);
+
+	var stdDev = Math.sqrt(avgSquareDiff);
+	return stdDev;
+}
+
+function avg(data) {
+	var sum = data.reduce(function (sum, value) {
+		return sum + value;
+	}, 0);
+
+	var mean = sum / data.length;
+	return mean;
+}
+
+var StatisticsMonitor = function (_Monitor) {
+	_inherits(StatisticsMonitor, _Monitor);
+
+	function StatisticsMonitor(selection, state_properties, interval) {
+		_classCallCheck(this, StatisticsMonitor);
+
+		var _this = _possibleConstructorReturn(this, (StatisticsMonitor.__proto__ || Object.getPrototypeOf(StatisticsMonitor)).call(this, selection));
+
+		_this.interval = interval;
+		_this.state_properties = state_properties;
+
+		_this.logged_aggregations = [];
+		_this.logged_timesteps = [];
+		_this.logged_properties = [];
+		return _this;
+	}
+
+	_createClass(StatisticsMonitor, [{
+		key: 'log',
+		value: function log(components, groups, timestep) {
+			var _this2 = this;
+
+			if (timestep % this.interval == 0) {
+				var selected_ids = _lodash2.default.flatten(this.selected_groups.map(function (group_name) {
+					return groups[group_name];
+				}));
+				var selected_states = selected_ids.map(function (id) {
+					return components[id].state;
+				});
+
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					var _loop = function _loop() {
+						var state_property = _step.value;
+
+
+						var selected_properties = selected_states.map(function (state) {
+							return state[state_property];
+						});
+						var min = Math.min.apply(Math, _toConsumableArray(selected_properties));
+						var max = Math.max.apply(Math, _toConsumableArray(selected_properties));
+						var mean = avg(selected_properties);
+						var std_dev = std(selected_properties);
+
+						_this2.logged_aggregations.push([min, max, mean, std_dev]);
+						_this2.logged_timesteps.push(timestep);
+						_this2.logged_properties.push(state_property);
+					};
+
+					for (var _iterator = this.state_properties[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						_loop();
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
+			}
+		}
+	}, {
+		key: 'data',
+		get: function get() {
+			var length = this.logged_timesteps.length;
+
+			var data = new Array(length);
+
+			for (var i = 0; i < length; i++) {
+				data[i] = {
+					group: this.selected_groups.toString(), //name of selected group
+					prop: this.logged_properties[i],
+					min: this.logged_aggregations[i][0],
+					max: this.logged_aggregations[i][1],
+					mean: this.logged_aggregations[i][2],
+					std: this.logged_aggregations[i][3],
+					t: this.logged_timesteps[i]
+				};
+			}
+
+			return data;
+		}
+	}]);
+
+	return StatisticsMonitor;
+}(_Monitor3.default);
+
+exports.default = StatisticsMonitor;
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _ComponentManager = __webpack_require__(3);
 
 var _ComponentManager2 = _interopRequireDefault(_ComponentManager);
@@ -19658,7 +19865,7 @@ var _ConnectionManager = __webpack_require__(2);
 
 var _ConnectionManager2 = _interopRequireDefault(_ConnectionManager);
 
-var _ConnectionSelection = __webpack_require__(21);
+var _ConnectionSelection = __webpack_require__(22);
 
 var _ConnectionSelection2 = _interopRequireDefault(_ConnectionSelection);
 
@@ -19860,7 +20067,7 @@ var ComponentSelection = function (_Selection) {
 exports.default = ComponentSelection;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19975,7 +20182,7 @@ var ConnectionSelection = function (_Selection) {
 exports.default = ConnectionSelection;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20000,7 +20207,7 @@ exports.Session = _Session2.default;
 exports.DynamicVariables = _DynamicVariables2.default;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 var g;
@@ -20027,7 +20234,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
