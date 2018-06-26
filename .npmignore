@@ -7,3 +7,5 @@
 .TODO
 .PROBLEMS
 .gitignore
+.package-lock.json
+.npm-debug.log
