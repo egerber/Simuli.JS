@@ -1,0 +1,9 @@
+/node_modules
+.AGENDA
+.DESCRIPTIONS
+.ERROR
+.IDEAS
+.ISSUES
+.TODO
+.PROBLEMS
+.gitignore

@@ -7,32 +7,37 @@ export default class GroupContainer{
 	constructor(groups={}){
 		this._groups=groups;
 		this._group_names=[];
+		this._callback_component_added=null;
+		this._callback_component_removed=null;
+		this._length=0;//keeping track of all count members
 	}
 	/*
 	group can be a single string or an array of strings, specifying multiple group memberships
 	*/
-	add(component_type, quantity, groups=null,args=null){
-		let ids=new Array(quantity);
+	add(component_type, quantity, group_name=null,args=null){
+		let ids=[];
 		for(let i=0;i<quantity;i++){
-			ids[i]=ComponentManager.add(component_type,args);
+			ids.push(ComponentManager.add(component_type,args));
+		}
+
+		if(this._callback_component_added!=null){
+			for(let id of ids){
+				this._callback_component_added(id,group_name);
+			}
 		}
 		
-		if(groups==null){ //if groups is not specified, default group name is the component_type
-			groups=[component_type];
+		if(group_name==null){ //if groups is not specified, default group name is the component_type
+			group_name=component_type;
 		}
-		else if(!Array.isArray(groups)){
-			groups=[groups];
-		}
-
-		for(let group_name of groups){
-			if(this._group_names.indexOf(group_name)==-1){
-				this._group_names.push(group_name);
-				this._groups[group_name]=[];
-			}
-
-			this._groups[group_name]=this._groups[group_name].concat(ids);
+		
+		if(this._group_names.indexOf(group_name)==-1){
+			this._group_names.push(group_name);
+			this._groups[group_name]=[];
 		}
 
+		this._groups[group_name]=this._groups[group_name].concat(ids);
+		
+		this._length+=quantity;
 		return new ComponentSelection(ids);
 	}
 
@@ -54,9 +59,29 @@ export default class GroupContainer{
 			let index=this._groups[group_name].indexOf(id);
 			if(index!==-1){
 				this._groups[group_name].splice(index,1);
+				break; //component can only be part of one group
 			}
 		}
+
+		if(this._callback_component_removed!=null){
+			this._callback_component_removed(id);
+		}
+
+		this._length--;
 	}
+
+	get length(){
+		return this._length;
+	}
+
+	set_callback_component_added(func){
+		this._callback_component_added=func;
+	}
+
+	set_callback_component_removed(func){
+		this._callback_component_removed=func;
+	}	
+
 
 
 }

@@ -7,7 +7,8 @@ describe("ConnectionSelection",function(){
 	let session=new Session()
 	.schema("component",{})
 	.system({})
-
+	.init()
+	
 	let system_state=session.components[0].state;
 
 	it("remove",function(){

@@ -94,12 +94,12 @@ export default class Selection{
 	sample(quantity=1){
 		quantity=Math.min(this._selected_ids.length,quantity);
 
-		let indices=new Array(quantity).map((el,i)=>i);
+		let indices=_.range(quantity);
 		let selected_indices=_.sampleSize(indices, quantity);
 
 		let sampled_ids=new Array(quantity);
 		let sampled_states=new Array(quantity);
-		for(let i=0;i<selected_indices;i++){
+		for(let i=0;i<quantity;i++){
 			let index=selected_indices[i];
 			sampled_ids[i]=this._selected_ids[index];
 			sampled_states[i]=this._selected_states[index];

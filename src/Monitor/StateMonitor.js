@@ -3,15 +3,19 @@ import _ from 'lodash';
 
 export default class StateMonitor extends Monitor{
 
-	constructor(selected_groups,selected_state_properties,interval){
+	constructor(selected_groups,selected_properties,interval){
 		super(selected_groups); 
 
 		
-		this.selected_state_properties=selected_state_properties;
+		this.selected_properties=selected_properties;
 
 		this.interval=interval;
 
-		this.logged_states=[];
+		this.logged_props=[];
+		for(let i=0;i<selected_properties.length;i++){
+			this.logged_props.push([]);
+		}
+
 		this.logged_ids=[];
 		this.logged_timesteps=[];
 	}
@@ -28,21 +32,28 @@ export default class StateMonitor extends Monitor{
 	log(components,groups,timestep){
 
 		if( (timestep % this.interval)==0){
-			let selected_ids=_.flatten(this.selected_groups.map( group_name=>groups[group_name]));
 			
-			let selected_states=selected_ids.map( id => this._pick_properties(components[id].state,this.selected_state_properties));
+			let selected_ids=_.flatten(this.selected_groups.map( group_name=>groups[group_name]));
+			let selected_states=selected_ids.map(id=>components[id].state);
 
+			for(let i=0;i<this.selected_properties.length;i++){
+				let prop=this.selected_properties[i]
+				this.logged_props[i]=_.concat(this.logged_props[i],selected_states.map(state=>state[prop]));
+			}
+			
 			this.logged_ids=_.concat(this.logged_ids,selected_ids);
-			this.logged_states=_.concat(this.logged_states,selected_states);
 			this.logged_timesteps=_.concat(this.logged_timesteps,_.fill(Array(selected_ids.length),timestep));
 		}
 	}
 
 	get data(){
-		let decompressed=new Array(this.logged_ids.length);
+		let decompressed=new Array(this.logged_ids.length*this.selected_properties.length);
 
 		for(let i=0,length=this.logged_ids.length;i<length;i++){
-			decompressed[i]={id:this.logged_ids[i],state:this.logged_states[i],t:this.logged_timesteps[i]}
+			for(let j=0,count_props=this.selected_properties.length;j<count_props;j++){
+				decompressed[length*j+i]={id:this.logged_ids[i],prop:this.selected_properties[j], value:this.logged_props[j][i],t:this.logged_timesteps[i]}
+			}
+			
 		}
 
 		return decompressed;

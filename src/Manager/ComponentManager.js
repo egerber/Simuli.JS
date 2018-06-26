@@ -1,6 +1,5 @@
 import Components from '../Components/ComponentTypes';
 import DynamicVariable from '../DynamicVariables/DynamicVariable';
-import GroupContainer from '../GroupContainer/GroupContainer';
 import ConnectionManager from './ConnectionManager';
 
 export default class ComponentManager{
@@ -67,7 +66,8 @@ export default class ComponentManager{
 
 		if(component_type=="System"){
 			state={...ComponentManager.default_state_properties,...schema.init_state};
-			state.members=new GroupContainer({}); //initialize group access
+			state.members=ComponentManager.active_session.group_container;
+
 			if(schema.hasOwnProperty("init")){
 				schema.init(state); //call system init function 
 			}
