@@ -1,11 +1,4 @@
 /node_modules
-.AGENDA
-.DESCRIPTIONS
-.ERROR
-.IDEAS
-.ISSUES
-.TODO
-.PROBLEMS
-.gitignore
-.package-lock.json
-.npm-debug.log
+gitignore
+package-lock.json
+npm-debug.log
