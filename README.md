@@ -371,6 +371,8 @@ let session=new Session("neural_network")
 	.state_monitor(["neurons","synapses"],["score"],1)
 	.activation_monitor(["inputs", "neurons", "synapses"], "feedforward",1)
 	.activation_monitor(["neurons"], "feedback", 1)
+	.statistics_monitor(["neurons"], ["score"],1)
+	.graph_monitor()
 	.run(1000)
 }
 
