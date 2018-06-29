@@ -19096,12 +19096,13 @@ var DirectedGraph = function () {
 		value: function remove_node(node) {
 
 			//remove all out_connections
+			var out_connections = this.adj_list_out[node].slice();
 			var _iteratorNormalCompletion = true;
 			var _didIteratorError = false;
 			var _iteratorError = undefined;
 
 			try {
-				for (var _iterator = this.adj_list_out[node][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+				for (var _iterator = out_connections[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 					var connection_id = _step.value;
 
 					this.remove_edge(connection_id);
@@ -19123,12 +19124,13 @@ var DirectedGraph = function () {
 				}
 			}
 
+			var in_connections = this.adj_list_in[node].slice();
 			var _iteratorNormalCompletion2 = true;
 			var _didIteratorError2 = false;
 			var _iteratorError2 = undefined;
 
 			try {
-				for (var _iterator2 = this.adj_list_in[node][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+				for (var _iterator2 = in_connections[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 					var _connection_id = _step2.value;
 
 					this.remove_edge(_connection_id);
