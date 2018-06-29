@@ -19000,7 +19000,7 @@ var DirectedGraph = function () {
   	get_in_edges(node){
   		return this.adj_list_in[node].map(id=>this.connections[id][INDEX_FROM]);
   	}
-  	
+  
   	get_out_edges(node){
   		return this.adj_list_out[node].map(id=>this.connections[id][INDEX_TO]);
   	}*/
@@ -19085,6 +19085,8 @@ var DirectedGraph = function () {
 			adj_out.splice(adj_out.indexOf(id), 1);
 			adj_in.splice(adj_in.indexOf(id), 1);
 
+			delete this.connections[id];
+
 			if (this._callback_connection_removed != null) {
 				this._callback_connection_removed(id, this.name);
 			}
@@ -19093,7 +19095,7 @@ var DirectedGraph = function () {
 		key: 'remove_node',
 		value: function remove_node(node) {
 
-			//remove node reference in all nodes receiving input from this node
+			//remove all out_connections
 			var _iteratorNormalCompletion = true;
 			var _didIteratorError = false;
 			var _iteratorError = undefined;
@@ -19105,7 +19107,7 @@ var DirectedGraph = function () {
 					this.remove_edge(connection_id);
 				}
 
-				//delete reference in order array
+				//remove all in connections
 			} catch (err) {
 				_didIteratorError = true;
 				_iteratorError = err;
@@ -19117,6 +19119,33 @@ var DirectedGraph = function () {
 				} finally {
 					if (_didIteratorError) {
 						throw _iteratorError;
+					}
+				}
+			}
+
+			var _iteratorNormalCompletion2 = true;
+			var _didIteratorError2 = false;
+			var _iteratorError2 = undefined;
+
+			try {
+				for (var _iterator2 = this.adj_list_in[node][Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+					var _connection_id = _step2.value;
+
+					this.remove_edge(_connection_id);
+				}
+
+				//delete reference in order array
+			} catch (err) {
+				_didIteratorError2 = true;
+				_iteratorError2 = err;
+			} finally {
+				try {
+					if (!_iteratorNormalCompletion2 && _iterator2.return) {
+						_iterator2.return();
+					}
+				} finally {
+					if (_didIteratorError2) {
+						throw _iteratorError2;
 					}
 				}
 			}
@@ -19163,11 +19192,11 @@ var DirectedGraph = function () {
 		}
 
 		let nodes=_.keys(this.adj_list_out).map(x=>_.toInteger(x));
-		
+
 		//start with the lowest key (=the key that was created first)
 		let list_visited=[];
 		let list_sorted=[];
-		
+
 		for(let node of nodes){
 			if(list_visited.indexOf(node)==-1){
 				list_visited.push(node);

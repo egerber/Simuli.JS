@@ -18,8 +18,8 @@ export default class DirectedGraph{
 		this.connections={}; //saves id-> [node_from, node_to, delay]
 
 		this.adj_list_out={}; //{id1:[id_con1, id_con2]}
-		this.adj_list_in={}; 
-		
+		this.adj_list_in={};
+
 		this._callback_connection_added=null;
 		this._callback_connection_removed=null;
 
@@ -56,7 +56,7 @@ export default class DirectedGraph{
 	get_in_edges(node){
 		return this.adj_list_in[node].map(id=>this.connections[id][INDEX_FROM]);
 	}
-	
+
 	get_out_edges(node){
 		return this.adj_list_out[node].map(id=>this.connections[id][INDEX_TO]);
 	}*/
@@ -86,7 +86,7 @@ export default class DirectedGraph{
 		if(delay==0){
 			let ord_node_to=this.get_order(node_to);
 			let ord_node_from=this.get_order(node_from);
-			
+
 			if(ord_node_from>ord_node_to){ //if node_to has higher order than node_from, decrease order from node_from to be smaller than the recipient node
 				this.move_before(this.order,ord_node_from, ord_node_to);
 			}//else keep order
@@ -111,10 +111,10 @@ export default class DirectedGraph{
 
 			let ord_from=this.get_order(connection[INDEX_FROM]);
 			let in_connections=this.get_in_connections(connection[INDEX_FROM]);
-	
+
 			let orders=in_connections.map(con=>this.get_order(con[INDEX_FROM]));
 			let max_in_ord=_.max(orders);
-			
+
 			if(max_in_ord>ord_from){//if child has higher order than parent (child -> parent), set order of parent higher than child
 				this.move_after(this.order,ord_from,max_in_ord)
 			}//else: keep order
@@ -129,6 +129,8 @@ export default class DirectedGraph{
 		adj_out.splice(adj_out.indexOf(id),1);
 		adj_in.splice(adj_in.indexOf(id),1);
 
+		delete this.connections[id];
+
 		if(this._callback_connection_removed!=null){
 			this._callback_connection_removed(id,this.name);
 		}
@@ -136,8 +138,15 @@ export default class DirectedGraph{
 
 	remove_node(node){
 
-		//remove node reference in all nodes receiving input from this node
-		for(let connection_id of this.adj_list_out[node]){
+		//remove all out_connections
+		let out_connections=this.adj_list_out[node].slice();
+		for(let connection_id of out_connections){
+			this.remove_edge(connection_id);
+		}
+
+		//remove all in connections
+		let in_connections=this.adj_list_in[node].slice();
+		for(let connection_id of in_connections){
 			this.remove_edge(connection_id);
 		}
 
@@ -162,7 +171,7 @@ export default class DirectedGraph{
 
 	set_callback_connection_removed(func){
 		this._callback_connection_removed=func;
-	}	
+	}
 
 }
 
@@ -181,11 +190,11 @@ export default class DirectedGraph{
 		}
 
 		let nodes=_.keys(this.adj_list_out).map(x=>_.toInteger(x));
-		
+
 		//start with the lowest key (=the key that was created first)
 		let list_visited=[];
 		let list_sorted=[];
-		
+
 		for(let node of nodes){
 			if(list_visited.indexOf(node)==-1){
 				list_visited.push(node);
