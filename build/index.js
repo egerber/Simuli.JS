@@ -17424,14 +17424,14 @@ var ComponentManager = function () {
 				state = _extends({}, ComponentManager.default_state_properties, schema.init_state);
 				state.members = ComponentManager.active_session.group_container;
 
+				_ConnectionManager2.default.add_node(id); //add node before init() is called, in order to have this node at the first place (=> becomes executed before any other component)
 				if (schema.hasOwnProperty("init")) {
-					schema.init(state); //call system init function 
+					schema.init(state); //call system init function
 				}
 			} else {
 				state = _extends({}, ComponentManager.default_state_properties, schema.init_state);
+				_ConnectionManager2.default.add_node(id);
 			}
-
-			ComponentManager.initialize_dynamic_variables(state);
 
 			var component = {
 				schema: schema,
@@ -17443,8 +17443,7 @@ var ComponentManager = function () {
 			};
 
 			ComponentManager.active_session.components[id] = component;
-
-			_ConnectionManager2.default.add_node(id);
+			ComponentManager.initialize_dynamic_variables(state);
 			return id;
 		}
 
@@ -19152,7 +19151,7 @@ var DirectedGraph = function () {
 				}
 			}
 
-			this.order.splice(this.order.indexOf(node));
+			this.order.splice(this.order.indexOf(node), 1);
 
 			delete this.adj_list_out[node];
 			delete this.adj_list_in[node];

@@ -151,7 +151,7 @@ export default class DirectedGraph{
 		}
 
 		//delete reference in order array
-		this.order.splice(this.order.indexOf(node));
+		this.order.splice(this.order.indexOf(node),1);
 
 		delete this.adj_list_out[node];
 		delete this.adj_list_in[node];

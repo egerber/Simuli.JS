@@ -38,7 +38,7 @@ export default class ComponentManager{
 
 		this._state=new_state;
 	}
-	
+
 	static add(component_type,args=null){
 
 		let session=ComponentManager.active_session;
@@ -68,30 +68,30 @@ export default class ComponentManager{
 			state={...ComponentManager.default_state_properties,...schema.init_state};
 			state.members=ComponentManager.active_session.group_container;
 
+			ConnectionManager.add_node(id); //add node before init() is called, in order to have this node at the first place (=> becomes executed before any other component)
 			if(schema.hasOwnProperty("init")){
-				schema.init(state); //call system init function 
+				schema.init(state); //call system init function
 			}
+
 		}else{
 			state={...ComponentManager.default_state_properties,...schema.init_state};
+			ConnectionManager.add_node(id);
 		}
 
-		ComponentManager.initialize_dynamic_variables(state);
-		
 		let component={
-			schema:schema, 
-			state:state,
-			current_output:undefined,
-			current_feedback:undefined,
-			last_output:undefined,
-			last_feedback:undefined
-		}
+				schema:schema,
+				state:state,
+				current_output:undefined,
+				current_feedback:undefined,
+				last_output:undefined,
+				last_feedback:undefined
+			}
 
 		ComponentManager.active_session.components[id]=component;
-
-		ConnectionManager.add_node(id);
+		ComponentManager.initialize_dynamic_variables(state);
 		return id;
 	}
-	
+
 	//removes component with specified id from current session
 	//deletes all links from graphs as well (handled by ConnectionManager)
 	static remove(id){

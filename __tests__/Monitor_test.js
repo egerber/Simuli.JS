@@ -22,9 +22,10 @@ describe("Monitor",function(){
 			group1.connect({target:group2,mapping:(i,j)=>i==j, type:"bidirectional"});
 		},
 		events:[
-			{	
-				interval:1, 
+			{
+				interval:1,
 				action:function(state){
+
 					let new_components=state.members.add("component",5,"new_group");
 					new_components.connect({target:new_components,type:"feedforward"});
 					let sample=state.members.select("new_group").sample(1);
@@ -51,11 +52,11 @@ describe("Monitor",function(){
 
 	it("StateMonitor",function(){
 		let state_data=data.states;
-		
+
 		expect(state_data.length).toBe(count_iterations*6*2);
 		expect(state_data).toContainEqual({id:1,prop: "var1", value:2,t:0});
 		expect(state_data).toContainEqual({id:1,prop: "var2", value:2,t:0});
-		expect(state_data).toContainEqual({id:1,prop: "var1", value:5,t:3});		
+		expect(state_data).toContainEqual({id:1,prop: "var1", value:5,t:3});
 		expect(state_data).toContainEqual({id:1,prop: "var2", value:3,t:3});
 		expect(state_data.filter(obj=>obj.prop=="var1").length).toBe(count_iterations*6);
 		expect(state_data.filter(obj=>obj.t==0).length).toBe(6*2);
@@ -70,7 +71,7 @@ describe("Monitor",function(){
 		expect(feedforward_data).toContainEqual({id:2,value:3,t:3});
 
 		let feedback_data=data.feedback;
-		
+
 		expect(feedback_data.length).toBe(3*count_iterations);
 		expect(feedback_data).toContainEqual({id:4,value:-0,t:0});
 		expect(feedback_data).toContainEqual({id:5,value:-1,t:1});
@@ -86,7 +87,7 @@ describe("Monitor",function(){
 
 	it("StatisticsMonitor",function(){
 		let statistics_data=data.statistics;
-	
+
 		expect(statistics_data).toContainEqual({group:"group1,group2",prop:"var1",min:2,max:2,mean:2,std:0,t:0});
 		expect(statistics_data).toContainEqual({group:"group1,group2",prop:"var2",min:2,max:2,mean:2,std:0,t:0});
 		expect(statistics_data).toContainEqual({group:"group1,group2",prop:"var1",min:5,max:5,mean:5,std:0,t:3});
